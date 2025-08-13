@@ -22,7 +22,8 @@ class spi_test extends uvm_test;
     phase.raise_objection(this);
     
     seq.start(env.agt_drv.sqr);
-    
+
     phase.drop_objection(this);
+    
   endtask
 endclass
