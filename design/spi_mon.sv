@@ -41,110 +41,119 @@ class spi_mon extends uvm_monitor;
 		tr_dut = spi_tran::type_id::create("tr_dut");
 
 		fork
-			if(mon_is_drv == 1'b0) begin
-				// falling sampling;
-				forever begin
-					// @(posedge vif.clk iff vif.start);
-					ev_fsclk.wait_on();
-					// @(posedge vif.clk);
-					// tr_dut = spi_tran::type_id::create("tr_dut");
-					tr_dut.rst_n = vif.rst_n;
-					tr_dut.start = vif.start;
-					tr_dut.tx_data = vif.tx_data;
-					tr_dut.rx_data = vif.rx_data;
-					tr_dut.busy = vif.busy;
-					tr_dut.done = vif.done;
-					tr_dut.sclk = vif.sclk;
-					tr_dut.mosi = vif.mosi;
-					tr_dut.miso = vif.miso;
-					tr_dut.cs_n = vif.cs_n;
-					tr_dut.sample_type = "fall";
-					tr_dut.tran_is_drv_type = mon_is_drv;
+			// falling sampling;
+			forever begin
+				// @(posedge vif.clk iff vif.start);
+				ev_fsclk.wait_on();
+				// @(posedge vif.clk);
+				// tr_dut = spi_tran::type_id::create("tr_dut");
+				tr_dut.rst_n = vif.rst_n;
+				tr_dut.start = vif.start;
+				tr_dut.tx_data = vif.tx_data;
+				tr_dut.rx_data = vif.rx_data;
+				tr_dut.busy = vif.busy;
+				tr_dut.done = vif.done;
+				tr_dut.sclk = vif.sclk;
+				tr_dut.mosi = vif.mosi;
+				tr_dut.miso = vif.miso;
+				tr_dut.cs_n = vif.cs_n;
+				tr_dut.sample_type = "fall";
+				tr_dut.tran_is_drv_type = mon_is_drv;
 
-					if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-						tr_dut.num_sample++;
-					end
-					else if(vif.done == 1'b1) begin
-						tr_dut.num_sample++;
-					end
-					else begin
-						tr_dut.num_sample = 0;
-					end
+				// deserialize miso and mosi;
+				tr_dut.mosi_fpush_bit(vif.mosi);
+				tr_dut.miso_fpush_bit(vif.miso);
 
-					tr_dut.num_sample = tr_dut.num_sample % (TOTAL_NUM_SAMPLE+1);
-
-					`uvm_info("MONITOR", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
-							tr_dut.rst_n,
-							tr_dut.sclk,
-							tr_dut.start,
-							tr_dut.tx_data,
-							tr_dut.rx_data,
-							tr_dut.busy,
-							tr_dut.done,
-							tr_dut.mosi,
-							tr_dut.miso,
-							tr_dut.cs_n,
-							tr_dut.sample_type,
-							tr_dut.tran_is_drv_type
-						), 
-						UVM_MEDIUM)
-
-					mon_ap.write(tr_dut);
-					ev_fsclk.reset();
+				if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
+					tr_dut.num_mosi_fsample++;
+					tr_dut.num_miso_fsample++;
 				end
-			end
-			else begin
-				// rising sampling;
-				forever begin
-					ev_rsclk.wait_on();
-					// @(posedge vif.clk);
-					// tr_dut = spi_tran::type_id::create("tr_dut");
-					tr_dut.rst_n = vif.rst_n;
-					tr_dut.start = vif.start;
-					tr_dut.tx_data = vif.tx_data;
-					tr_dut.rx_data = vif.rx_data;
-					tr_dut.busy = vif.busy;
-					tr_dut.done = vif.done;
-					tr_dut.sclk = vif.sclk;
-					tr_dut.mosi = vif.mosi;
-					tr_dut.miso = vif.miso;
-					tr_dut.cs_n = vif.cs_n;
-					tr_dut.sample_type = "rising";
-					tr_dut.tran_is_drv_type = mon_is_drv;
-
-					if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-						tr_dut.num_sample++;
-						
-					end
-					else if(vif.done == 1'b1) begin
-						tr_dut.num_sample++;
-					end
-					else begin
-						tr_dut.num_sample = 0;
-					end
-
-					tr_dut.num_sample = tr_dut.num_sample % (TOTAL_NUM_SAMPLE+1);
-
-					`uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
-							tr_dut.sclk,
-							tr_dut.start,
-							tr_dut.tx_data,
-							tr_dut.rx_data,
-							tr_dut.busy,
-							tr_dut.done,
-							tr_dut.mosi,
-							tr_dut.miso,
-							tr_dut.cs_n,
-							tr_dut.sample_type,
-							tr_dut.tran_is_drv_type
-						), 
-						UVM_MEDIUM)
-
-					mon_ap.write(tr_dut);
-					ev_rsclk.reset();
+				else if(vif.done == 1'b1) begin
+					tr_dut.num_mosi_fsample++;
+					tr_dut.num_miso_fsample++;
 				end
-			end
+				else begin
+					tr_dut.num_mosi_fsample = 0;
+					tr_dut.num_miso_fsample = 0;
+				end
 
+				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % (TOTAL_NUM_SAMPLE+1);
+
+				`uvm_info("MONITOR", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
+						tr_dut.rst_n,
+						tr_dut.sclk,
+						tr_dut.start,
+						tr_dut.tx_data,
+						tr_dut.rx_data,
+						tr_dut.busy,
+						tr_dut.done,
+						tr_dut.mosi,
+						tr_dut.miso,
+						tr_dut.cs_n,
+						tr_dut.sample_type,
+						tr_dut.tran_is_drv_type
+					), 
+					UVM_MEDIUM)
+
+				// communicate;
+				mon_ap.write(tr_dut);
+				ev_fsclk.reset();
+			end
+			
+			// rising sampling;
+			forever begin
+				ev_rsclk.wait_on();
+				@(posedge vif.clk);
+				// tr_dut = spi_tran::type_id::create("tr_dut");
+				tr_dut.rst_n = vif.rst_n;
+				tr_dut.start = vif.start;
+				tr_dut.tx_data = vif.tx_data;
+				tr_dut.rx_data = vif.rx_data;
+				tr_dut.busy = vif.busy;
+				tr_dut.done = vif.done;
+				tr_dut.sclk = vif.sclk;
+				tr_dut.mosi = vif.mosi;
+				tr_dut.miso = vif.miso;
+				tr_dut.cs_n = vif.cs_n;
+				tr_dut.sample_type = "rising";
+				tr_dut.tran_is_drv_type = mon_is_drv;
+
+				// deserialize miso;	
+				tr_dut.mosi_rpush_bit(vif.mosi);
+				tr_dut.miso_rpush_bit(vif.miso);
+
+				if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
+					tr_dut.num_mosi_rsample++;
+					tr_dut.num_miso_rsample++;
+				end
+				else if(vif.done == 1'b1) begin
+					tr_dut.num_mosi_rsample++;
+					tr_dut.num_miso_rsample++;
+				end
+				else begin
+					tr_dut.num_mosi_rsample = 0;
+					tr_dut.num_miso_rsample = 0;
+				end
+
+				`uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
+						tr_dut.sclk,
+						tr_dut.start,
+						tr_dut.tx_data,
+						tr_dut.rx_data,
+						tr_dut.busy,
+						tr_dut.done,
+						tr_dut.mosi,
+						tr_dut.miso,
+						tr_dut.cs_n,
+						tr_dut.sample_type,
+						tr_dut.tran_is_drv_type
+					), 
+					UVM_MEDIUM)
+
+				mon_ap.write(tr_dut);
+				ev_rsclk.reset();
+			end
+			
 			forever begin
 				@(negedge vif.sclk) ev_fsclk.trigger();
 				`uvm_info("MONITOR", $sformatf("EVENT: falling sclk detected"), UVM_MEDIUM)

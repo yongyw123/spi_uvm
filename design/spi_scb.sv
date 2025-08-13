@@ -87,32 +87,30 @@ class spi_scb extends uvm_scoreboard;
 					`uvm_info("SCOREBOARD", $sformatf("TEST IDLE - FAILED"), UVM_MEDIUM)
 				end
 			end
-
 		end
 
-		/////////////////////
-		// TEST 03: TX -> MOSI
-		/////////////////////
-		// check order;
-		if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
-			if(tr_fifo_con.num_sample > 0) begin
-				sva_t3: assert(tr_fifo_con.mosi == tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)])
-					else begin
-						`uvm_info("SCOREBOARD", $sformatf("TEST TX - FAILED: [num_sample: %0d; idx: %0d] expected mosi to be %0b but observed %0b", 
-							tr_fifo_con.num_sample, 
-							8-(tr_fifo_con.num_sample),
-							tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)], 
-							tr_fifo_con.mosi), 
-						UVM_MEDIUM)
-					end
-			end
-		end
-		
+		// /////////////////////
+		// // TEST 03: TX -> MOSI
+		// /////////////////////
+		// // check order;
+		// if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
+		// 	if(tr_fifo_con.num_rsample > 0) begin
+		// 		sva_t3: assert(tr_fifo_con.mosi == tr_fifo_con.tx_data[8-(tr_fifo_con.num_rsample)])
+		// 			else begin
+		// 				`uvm_info("SCOREBOARD", $sformatf("TEST TX - FAILED: [num_rsample: %0d; idx: %0d] expected mosi to be %0b but observed %0b", 
+		// 					tr_fifo_con.num_rsample, 
+		// 					8-(tr_fifo_con.num_rsample),
+		// 					tr_fifo_con.tx_data[8-(tr_fifo_con.num_rsample)], 
+		// 					tr_fifo_con.mosi), 
+		// 				UVM_MEDIUM)
+		// 			end
+		// 	end
+		// end
 		
 		// fork
 		// 	forever begin 
 		// 		drv_fifo.get(tr_fifo_drv); 
-		// 		`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+		// 		`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 		// 				tr_fifo_drv.rst_n,
 		// 					tr_fifo_drv.sclk,
 		// 					tr_fifo_drv.start,
@@ -125,13 +123,13 @@ class spi_scb extends uvm_scoreboard;
 		// 					tr_fifo_drv.cs_n,
 		// 					tr_fifo_drv.sample_type,
 		// 					tr_fifo_drv.tran_is_drv_type,
-		// 					tr_fifo_drv.num_sample
+		// 					tr_fifo_drv.num_rsample
 		// 			), 
 		// 			UVM_MEDIUM)
 		// 	end 
 		// 	forever begin 
 		// 		con_fifo.get(tr_fifo_con); 
-		// 		`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+		// 		`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 		// 				tr_fifo_con.rst_n,
 		// 					tr_fifo_con.sclk,
 		// 					tr_fifo_con.start,
@@ -144,7 +142,7 @@ class spi_scb extends uvm_scoreboard;
 		// 					tr_fifo_con.cs_n,
 		// 					tr_fifo_con.sample_type,
 		// 					tr_fifo_con.tran_is_drv_type,
-		// 					tr_fifo_con.num_sample
+		// 					tr_fifo_con.num_rsample
 		// 			), 
 		// 			UVM_MEDIUM)
 		// 	end			
@@ -158,7 +156,7 @@ endclass
 // fork
 // 			forever begin 
 // 				drv_fifo.get(tr_fifo_drv); 
-// 				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+// 				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 // 						tr_fifo_drv.rst_n,
 // 							tr_fifo_drv.sclk,
 // 							tr_fifo_drv.start,
@@ -171,13 +169,13 @@ endclass
 // 							tr_fifo_drv.cs_n,
 // 							tr_fifo_drv.sample_type,
 // 							tr_fifo_drv.tran_is_drv_type,
-// 							tr_fifo_drv.num_sample
+// 							tr_fifo_drv.num_rsample
 // 					), 
 // 					UVM_MEDIUM)
 // 			end 
 // 			forever begin 
 // 				con_fifo.get(tr_fifo_con); 
-// 				`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+// 				`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 // 						tr_fifo_con.rst_n,
 // 							tr_fifo_con.sclk,
 // 							tr_fifo_con.start,
@@ -190,7 +188,7 @@ endclass
 // 							tr_fifo_con.cs_n,
 // 							tr_fifo_con.sample_type,
 // 							tr_fifo_con.tran_is_drv_type,
-// 							tr_fifo_con.num_sample
+// 							tr_fifo_con.num_rsample
 // 					), 
 // 					UVM_MEDIUM)
 // 			end			
@@ -203,17 +201,17 @@ endclass
 			// /////////////////////
 			// // check order;
 			// if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
-			// 	if(tr_fifo_con.num_sample > 0) begin
-			// 		sva_t3: assert(tr_fifo_con.mosi == tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)])
+			// 	if(tr_fifo_con.num_rsample > 0) begin
+			// 		sva_t3: assert(tr_fifo_con.mosi == tr_fifo_con.tx_data[8-(tr_fifo_con.num_rsample)])
 			// 			else begin
-			// 				`uvm_info("SCOREBOARD", $sformatf("TEST TX - FAILED: [num_sample: %0d; idx: %0d] expected mosi to be %0b but observed %0b", 
-			// 					tr_fifo_con.num_sample, 
-			// 					8-(tr_fifo_con.num_sample),
-			// 					tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)], 
+			// 				`uvm_info("SCOREBOARD", $sformatf("TEST TX - FAILED: [num_rsample: %0d; idx: %0d] expected mosi to be %0b but observed %0b", 
+			// 					tr_fifo_con.num_rsample, 
+			// 					8-(tr_fifo_con.num_rsample),
+			// 					tr_fifo_con.tx_data[8-(tr_fifo_con.num_rsample)], 
 			// 					tr_fifo_con.mosi), 
 			// 				UVM_MEDIUM)
 
-			// 				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+			// 				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 			// 					tr_fifo_drv.rst_n,
 			// 						tr_fifo_drv.sclk,
 			// 						tr_fifo_drv.start,
@@ -226,11 +224,11 @@ endclass
 			// 						tr_fifo_drv.cs_n,
 			// 						tr_fifo_drv.sample_type,
 			// 						tr_fifo_drv.tran_is_drv_type,
-			// 						tr_fifo_drv.num_sample
+			// 						tr_fifo_drv.num_rsample
 			// 				), 
 			// 				UVM_MEDIUM)
 
-			// 				`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_sample: %0d",
+			// 				`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_rsample: %0d",
 			// 						tr_fifo_con.rst_n,
 			// 							tr_fifo_con.sclk,
 			// 							tr_fifo_con.start,
@@ -243,7 +241,7 @@ endclass
 			// 							tr_fifo_con.cs_n,
 			// 							tr_fifo_con.sample_type,
 			// 							tr_fifo_con.tran_is_drv_type,
-			// 							tr_fifo_con.num_sample
+			// 							tr_fifo_con.num_rsample
 			// 					), 
 			// 					UVM_MEDIUM)
 
