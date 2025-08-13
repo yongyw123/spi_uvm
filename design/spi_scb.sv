@@ -90,6 +90,23 @@ class spi_scb extends uvm_scoreboard;
 
 		end
 
+		/////////////////////
+		// TEST 03: TX -> MOSI
+		/////////////////////
+		// check order;
+		if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
+			if(tr_fifo_con.num_sample > 0) begin
+				sva_t3: assert(tr_fifo_con.mosi == tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)])
+					else begin
+						`uvm_info("SCOREBOARD", $sformatf("TEST TX - FAILED: [num_sample: %0d; idx: %0d] expected mosi to be %0b but observed %0b", 
+							tr_fifo_con.num_sample, 
+							8-(tr_fifo_con.num_sample),
+							tr_fifo_con.tx_data[8-(tr_fifo_con.num_sample)], 
+							tr_fifo_con.mosi), 
+						UVM_MEDIUM)
+					end
+			end
+		end
 		
 		
 		// fork

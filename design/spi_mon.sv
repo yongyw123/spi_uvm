@@ -46,7 +46,7 @@ class spi_mon extends uvm_monitor;
 				forever begin
 					// @(posedge vif.clk iff vif.start);
 					ev_fsclk.wait_on();
-					@(posedge vif.clk);
+					// @(posedge vif.clk);
 					// tr_dut = spi_tran::type_id::create("tr_dut");
 					tr_dut.rst_n = vif.rst_n;
 					tr_dut.start = vif.start;
@@ -97,7 +97,7 @@ class spi_mon extends uvm_monitor;
 				// rising sampling;
 				forever begin
 					ev_rsclk.wait_on();
-					@(posedge vif.clk);
+					// @(posedge vif.clk);
 					// tr_dut = spi_tran::type_id::create("tr_dut");
 					tr_dut.rst_n = vif.rst_n;
 					tr_dut.start = vif.start;
