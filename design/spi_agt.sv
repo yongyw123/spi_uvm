@@ -19,6 +19,10 @@ class spi_agt extends uvm_agent;
 		if (get_is_active() == UVM_ACTIVE) begin
 			drv = spi_drv::type_id::create("drv", this);
 			sqr = spi_sqr::type_id::create("sqr", this);
+			uvm_config_db#(bit)::set(this, "mon", "mon_is_drv", 1'b1);
+		end
+		else begin
+			uvm_config_db#(bit)::set(this, "mon", "mon_is_drv", 1'b0);
 		end
 	endfunction
 
