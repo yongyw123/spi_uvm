@@ -19,10 +19,11 @@ class spi_scb extends uvm_scoreboard;
 	endfunction
 
 	function void write(spi_tran tr_dut);
-		`uvm_info("SCB", $sformatf("Writing SCB."), UVM_MEDIUM)
+		// driver;
 		if(tr_dut.tran_is_drv_type) begin
 			drv_fifo.try_put(tr_dut);
 		end
+		// consumer;
 		else begin
 			con_fifo.try_put(tr_dut);
 		end
@@ -30,14 +31,12 @@ class spi_scb extends uvm_scoreboard;
 	endfunction
 
 	task run_phase(uvm_phase phase);
-		`uvm_info("SCB", $sformatf("Entering SCB."), UVM_MEDIUM)
 		fork
 			forever begin
 				spi_tran tr_dut;
-				`uvm_info("SCB", $sformatf("Waiting OUT_FIFO."), UVM_MEDIUM)
 				drv_fifo.get(tr_dut);
-				// `uvm_info("SCB_FIFO",$sformatf("m_trn: %08b",tr_dut.tx_data), UVM_MEDIUM)
-				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
+				
+				`uvm_info("OUT_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, data_q: %p",
 						tr_dut.rst_n,
 							tr_dut.sclk,
 							tr_dut.start,
@@ -49,16 +48,19 @@ class spi_scb extends uvm_scoreboard;
 							tr_dut.miso,
 							tr_dut.cs_n,
 							tr_dut.sample_type,
-							tr_dut.tran_is_drv_type
+							tr_dut.tran_is_drv_type,
+							tr_dut.data_q[0]
 					), 
 					UVM_MEDIUM)
+
+
 			end
+
 
 			forever begin
 				spi_tran tr_dut;
-				`uvm_info("SCB", $sformatf("Waiting IN_FIFO."), UVM_MEDIUM)
 				con_fifo.get(tr_dut);
-				// `uvm_info("SCB_FIFO",$sformatf("m_trn: %08b",tr_dut.tx_data), UVM_MEDIUM)
+				
 				`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
 						tr_dut.rst_n,
 							tr_dut.sclk,
