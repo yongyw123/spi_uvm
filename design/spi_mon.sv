@@ -75,6 +75,8 @@ class spi_mon extends uvm_monitor;
 				else begin
 					tr_dut.num_mosi_fsample = 0;
 					tr_dut.num_miso_fsample = 0;
+					tr_dut.mosi_fq_clear();
+					tr_dut.miso_fq_clear();
 				end
 
 				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % (TOTAL_NUM_SAMPLE+1);
@@ -133,6 +135,8 @@ class spi_mon extends uvm_monitor;
 				else begin
 					tr_dut.num_mosi_rsample = 0;
 					tr_dut.num_miso_rsample = 0;
+					tr_dut.mosi_rq_clear();
+					tr_dut.miso_rq_clear();
 				end
 
 				`uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
