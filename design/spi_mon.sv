@@ -71,10 +71,7 @@ class spi_mon extends uvm_monitor;
 
 			// falling sampling;
 			forever begin
-				// @(posedge vif.clk iff vif.start);
-				ev_fsclk.wait_on();
-				// @(posedge vif.clk);
-				// tr_dut = spi_tran::type_id::create("tr_dut");
+				@(negedge vif.sclk)
 				tr_dut.rst_n = vif.rst_n;
 				tr_dut.start = vif.start;
 				tr_dut.tx_data = vif.tx_data;
@@ -92,12 +89,11 @@ class spi_mon extends uvm_monitor;
 				tr_dut.mosi_fpush_bit(vif.mosi);
 				tr_dut.miso_fpush_bit(vif.miso);
 
+				// increment;
 				tr_dut.num_mosi_fsample++;
 				tr_dut.num_miso_fsample++;			
 
-				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % (TOTAL_NUM_SAMPLE+1);
-
-				`uvm_info("MONITOR", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
+				`uvm_info("MONITOR - FALLING", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
 						tr_dut.rst_n,
 						tr_dut.sclk,
 						tr_dut.start,
@@ -109,23 +105,34 @@ class spi_mon extends uvm_monitor;
 						tr_dut.miso,
 						tr_dut.cs_n,
 						tr_dut.sample_type,
-						tr_dut.tran_is_drv_type
+						tr_dut.tran_is_drv_type,
+						tr_dut.num_mosi_rsample,
+						tr_dut.num_mosi_fsample,
+						tr_dut.num_miso_rsample,
+						tr_dut.num_miso_fsample,
+						tr_dut.mosi_rdata_q[0],
+						tr_dut.mosi_fdata_q[0],
+						tr_dut.miso_rdata_q[0],
+						tr_dut.miso_fdata_q[0]
 					), 
-					UVM_MEDIUM)
+					UVM_MEDIUM
+				)
 
-				// communicate;
+				// send the packet;
 				mon_ap.write(tr_dut);
-				ev_fsclk.reset();
-
+				
+				// wrap around;
 				tr_dut.num_mosi_fsample = tr_dut.num_mosi_fsample % 9;
 				tr_dut.num_miso_fsample = tr_dut.num_miso_fsample % 9;
 			end
 			
 			// rising sampling;
 			forever begin
-				ev_rsclk.wait_on();
+				@(posedge vif.sclk)
+				
+				// need to delay one sys clk to sample valid data;
 				@(posedge vif.clk);
-				// tr_dut = spi_tran::type_id::create("tr_dut");
+
 				tr_dut.rst_n = vif.rst_n;
 				tr_dut.start = vif.start;
 				tr_dut.tx_data = vif.tx_data;
@@ -143,85 +150,43 @@ class spi_mon extends uvm_monitor;
 				tr_dut.mosi_rpush_bit(vif.mosi);
 				tr_dut.miso_rpush_bit(vif.miso);
 				
+				// increment;
 				tr_dut.num_mosi_rsample++;
 				tr_dut.num_miso_rsample++;
 
-				
-				// if(tr_dut.num_mosi_rsample == 8) begin				
-				// 	tr_dut.mosi_rq_clear();
-				// 	tr_dut.miso_rq_clear();
-				// 	`uvm_info("MONITOR_RDBG_01", $sformatf("cleared"), UVM_MEDIUM)
-				// end
-				// else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-				// 	tr_dut.num_mosi_rsample++;
-				// 	tr_dut.num_miso_rsample++;
-				// end
-				// else begin
-				// 	tr_dut.mosi_rq_clear();
-				// 	tr_dut.miso_rq_clear();
-				// 	`uvm_info("MONITOR_RDBG_02", $sformatf("cleared"), UVM_MEDIUM)
-				// end
-
-				// `uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
-				// 		tr_dut.sclk,
-				// 		tr_dut.start,
-				// 		tr_dut.tx_data,
-				// 		tr_dut.rx_data,
-				// 		tr_dut.busy,
-				// 		tr_dut.done,
-				// 		tr_dut.mosi,
-				// 		tr_dut.miso,
-				// 		tr_dut.cs_n,
-				// 		tr_dut.sample_type,
-				// 		tr_dut.tran_is_drv_type
-				// 	), 
-				// 	UVM_MEDIUM)
-
-				`uvm_info("MONITOR_DEBUG", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
-
-							tr_dut.rst_n,
-							tr_dut.sclk,
-							tr_dut.start,
-							tr_dut.tx_data,
-							tr_dut.rx_data,
-							tr_dut.busy,
-							tr_dut.done,
-							tr_dut.mosi,
-							tr_dut.miso,
-							tr_dut.cs_n,
-							tr_dut.sample_type,
-							tr_dut.tran_is_drv_type,
-							tr_dut.num_mosi_rsample,
-							tr_dut.num_mosi_fsample,
-							tr_dut.num_miso_rsample,
-							tr_dut.num_miso_fsample,
-							tr_dut.mosi_rdata_q[0],
-							tr_dut.mosi_fdata_q[0],
-							tr_dut.miso_rdata_q[0],
-							tr_dut.miso_fdata_q[0]
+				`uvm_info("MONITOR - RISING", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
+						tr_dut.rst_n,
+						tr_dut.sclk,
+						tr_dut.start,
+						tr_dut.tx_data,
+						tr_dut.rx_data,
+						tr_dut.busy,
+						tr_dut.done,
+						tr_dut.mosi,
+						tr_dut.miso,
+						tr_dut.cs_n,
+						tr_dut.sample_type,
+						tr_dut.tran_is_drv_type,
+						tr_dut.num_mosi_rsample,
+						tr_dut.num_mosi_fsample,
+						tr_dut.num_miso_rsample,
+						tr_dut.num_miso_fsample,
+						tr_dut.mosi_rdata_q[0],
+						tr_dut.mosi_fdata_q[0],
+						tr_dut.miso_rdata_q[0],
+						tr_dut.miso_fdata_q[0]
 					), 
-					UVM_MEDIUM)
-
+					UVM_MEDIUM
+				)
+				
+				// send the packet;
 				mon_ap.write(tr_dut);
-				ev_rsclk.reset();
-
+				
+				// wrap around;
 				tr_dut.num_miso_rsample = tr_dut.num_miso_rsample % 9;
 				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 9;
 			end
-
-
-			// events;		
-			forever begin
-				@(negedge vif.sclk) ev_fsclk.trigger();
-				`uvm_info("MONITOR", $sformatf("EVENT: falling sclk detected"), UVM_MEDIUM)
-			end
-
-			forever begin
-				@(posedge vif.sclk) ev_rsclk.trigger();
-				`uvm_info("MONITOR", $sformatf("EVENT: rising sclk detected"), UVM_MEDIUM)
-			end
 		join
-
 	endtask
 
 endclass
