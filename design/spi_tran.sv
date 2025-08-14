@@ -9,17 +9,18 @@ class spi_tran extends uvm_sequence_item;
 	//////////////////
 
 	// uut packet;
-	bit rst_n;
+	rand bit rst_n;
 	rand bit start;
 	rand bit [7:0] tx_data;
-	rand bit [7:0] rx_data;
-	rand bit busy;
-	rand bit done;
+	
+	bit [7:0] rx_data;
+	bit busy;
+	bit done;
 
-	rand bit sclk;
-	rand bit mosi;
-	rand bit miso;
-	rand bit cs_n;
+	bit sclk;
+	bit mosi;
+	bit miso;
+	bit cs_n;
 
 	// sampling type: falling vs rising sclk vs free running'
 	string sample_type;
