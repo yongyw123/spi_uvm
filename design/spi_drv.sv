@@ -37,8 +37,6 @@ class spi_drv extends uvm_driver #(spi_tran);
 			vif.start <= 1'b1;
 			wait(vif.busy) @(posedge vif.clk);
 
-
-
 			// wait for spi tran to complete;
 			wait(vif.done) @(posedge vif.clk);
 

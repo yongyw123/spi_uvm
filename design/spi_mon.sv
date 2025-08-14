@@ -92,18 +92,8 @@ class spi_mon extends uvm_monitor;
 				tr_dut.mosi_fpush_bit(vif.mosi);
 				tr_dut.miso_fpush_bit(vif.miso);
 
-				if(tr_dut.num_mosi_fsample == 8) begin
-					tr_dut.mosi_fq_clear();
-					tr_dut.miso_fq_clear();
-				end
-				else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-					tr_dut.num_mosi_fsample++;
-					tr_dut.num_miso_fsample++;
-				end
-				else begin
-					tr_dut.mosi_fq_clear();
-					tr_dut.miso_fq_clear();
-				end
+				tr_dut.num_mosi_fsample++;
+				tr_dut.num_miso_fsample++;			
 
 				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % (TOTAL_NUM_SAMPLE+1);
 
@@ -126,6 +116,9 @@ class spi_mon extends uvm_monitor;
 				// communicate;
 				mon_ap.write(tr_dut);
 				ev_fsclk.reset();
+
+				tr_dut.num_mosi_fsample = tr_dut.num_mosi_fsample % 9;
+				tr_dut.num_miso_fsample = tr_dut.num_miso_fsample % 9;
 			end
 			
 			// rising sampling;
@@ -149,9 +142,10 @@ class spi_mon extends uvm_monitor;
 				// deserialize miso;	
 				tr_dut.mosi_rpush_bit(vif.mosi);
 				tr_dut.miso_rpush_bit(vif.miso);
-
 				
 				tr_dut.num_mosi_rsample++;
+				tr_dut.num_miso_rsample++;
+
 				
 				// if(tr_dut.num_mosi_rsample == 8) begin				
 				// 	tr_dut.mosi_rq_clear();
@@ -211,12 +205,8 @@ class spi_mon extends uvm_monitor;
 				mon_ap.write(tr_dut);
 				ev_rsclk.reset();
 
-				// tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 8;
+				tr_dut.num_miso_rsample = tr_dut.num_miso_rsample % 9;
 				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 9;
-				// if(tr_dut.num_mosi_rsample >= 9) begin
-				// 	tr_dut.num_mosi_rsample = 0;
-				// end
-				
 			end
 
 
