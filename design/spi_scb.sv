@@ -22,7 +22,6 @@ class spi_scb extends uvm_scoreboard;
 		drv_fifo = new("drv_fifo", this);
 		con_fifo = new("con_fifo", this);
 		free_fifo = new("free_fifo", this);
-
 	endfunction
 
 	function void write(spi_tran tr_dut);
@@ -30,19 +29,19 @@ class spi_scb extends uvm_scoreboard;
 		// on the system clock;
 		if(tr_dut.sample_type == "free") begin
 			free_fifo.try_put(tr_dut);
-			`uvm_info("SCB", $sformatf("[FREE_FIFO] got content;"), UVM_MEDIUM)
+			// `uvm_info("SCB", $sformatf("[FREE_FIFO] got content;"), UVM_MEDIUM)
 		end
 		// sampling based on sclk;
 		else begin
 			// driver;
 			if(tr_dut.tran_is_drv_type) begin
 				drv_fifo.try_put(tr_dut);
-				`uvm_info("SCB", $sformatf("[DRV_FIFO] got content;"), UVM_MEDIUM)
+				// `uvm_info("SCB", $sformatf("[DRV_FIFO] got content;"), UVM_MEDIUM)
 			end
 			// consumer
 			else begin
 				con_fifo.try_put(tr_dut);
-				`uvm_info("SCB", $sformatf("[CON_FIFO] got content;"), UVM_MEDIUM)
+				// `uvm_info("SCB", $sformatf("[CON_FIFO] got content;"), UVM_MEDIUM)
 			end
 		end
 	endfunction

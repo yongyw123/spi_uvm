@@ -38,33 +38,35 @@ class spi_mon extends uvm_monitor;
 
 	task run_phase(uvm_phase phase);
 		spi_tran tr_dut;
+		spi_tran tr_dut_free;
 		tr_dut = spi_tran::type_id::create("tr_dut");
+		tr_dut_free = spi_tran::type_id::create("tr_dut_free");
 
 		fork
 			// free running
 			forever begin
 				@(posedge vif.clk);
-				tr_dut.rst_n = vif.rst_n;
-				tr_dut.start = vif.start;
-				tr_dut.tx_data = vif.tx_data;
-				tr_dut.rx_data = vif.rx_data;
-				tr_dut.busy = vif.busy;
-				tr_dut.done = vif.done;
-				tr_dut.sclk = vif.sclk;
-				tr_dut.mosi = vif.mosi;
-				tr_dut.miso = vif.miso;
-				tr_dut.cs_n = vif.cs_n;
-				tr_dut.sample_type = "free";
-				tr_dut.tran_is_drv_type = mon_is_drv;
+				tr_dut_free.rst_n = vif.rst_n;
+				tr_dut_free.start = vif.start;
+				tr_dut_free.tx_data = vif.tx_data;
+				tr_dut_free.rx_data = vif.rx_data;
+				tr_dut_free.busy = vif.busy;
+				tr_dut_free.done = vif.done;
+				tr_dut_free.sclk = vif.sclk;
+				tr_dut_free.mosi = vif.mosi;
+				tr_dut_free.miso = vif.miso;
+				tr_dut_free.cs_n = vif.cs_n;
+				tr_dut_free.sample_type = "free";
+				tr_dut_free.tran_is_drv_type = mon_is_drv;
 				
 				// determine which tx_data is registered;
 				if(vif.rst_n == 1'b1) begin
 					if((vif.cs_n == 1'b1) && (vif.start == 1'b1)) begin
-						tr_dut.tx_data_reg = vif.tx_data;
-						`uvm_info("MONITOR", $sformatf("[FREE] new tx_data registered;"), UVM_MEDIUM)
+						tr_dut_free.tx_data_reg = vif.tx_data;
+						// `uvm_info("MONITOR", $sformatf("[FREE] new tx_data registered;"), UVM_MEDIUM)
 					end
 				end
-				mon_ap.write(tr_dut);
+				mon_ap.write(tr_dut_free);
 			end
 
 			// falling sampling;
@@ -184,8 +186,8 @@ class spi_mon extends uvm_monitor;
 				ev_rsclk.reset();
 			end
 
-			
-			
+
+			// events;		
 			forever begin
 				@(negedge vif.sclk) ev_fsclk.trigger();
 				`uvm_info("MONITOR", $sformatf("EVENT: falling sclk detected"), UVM_MEDIUM)
