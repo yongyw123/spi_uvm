@@ -138,7 +138,30 @@ class spi_scb extends uvm_scoreboard;
 				end
 			end
 
-			
+			/////////////////////
+			// TEST 05: MISO CPHA
+			/////////////////////
+			// check falling edge for rx_data;
+			// except for all-ones or all-zeros;
+			// de-serialized miso sampled at rising sclk and falling sclk should be different;
+			if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
+				if(tr_fifo_con.done == 1'b1) begin
+					if((tr_fifo_con.rx_data != '0) || (tr_fifo_con.rx_data != '1)) begin
+						sva_t5: assert(tr_fifo_con.miso_rdata_q[0] != tr_fifo_con.miso_fdata_q[0]) 
+						begin
+							passed_count++;
+							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - PASSED"), UVM_MEDIUM)
+						end
+						else begin
+							failed_count++;
+							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - FAILED"), UVM_MEDIUM)
+						end
+					end
+				end
+			end
+
+
+
 
 			// `uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %8b, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
 			`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2h, rx_data: %8b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %2h, mosi_rdata_q: %p, mosi_fdata_q: %p, miso_rdata_q: %p, miso_fdata_q: %p",
