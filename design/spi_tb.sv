@@ -14,6 +14,7 @@ module spi_tb;
 
 	`include "spi_seq_init.sv"
 	`include "spi_seq_strt.sv"
+	`include "spi_seq_rst.sv"
 	`include "spi_seq_tx.sv"
 	`include "spi_seq_rnd.sv"
 

@@ -4,6 +4,7 @@ class spi_test extends uvm_test;
 	spi_env env;
 	
 	spi_seq_init seq_init;
+	spi_seq_rst seq_rst;
 	spi_seq_strt seq_strt;
 	spi_seq_tx seq_tx;
 	spi_seq_rnd seq_rnd;
@@ -20,6 +21,7 @@ class spi_test extends uvm_test;
 	task run_phase(uvm_phase phase);
 	
 		seq_init = spi_seq_init::type_id::create("seq_init");
+		seq_rst = spi_seq_rst::type_id::create("seq_rst");
 		seq_strt = spi_seq_strt::type_id::create("seq_strt");
 		seq_tx = spi_seq_tx::type_id::create("seq_tx");
 		seq_rnd = spi_seq_rnd::type_id::create("seq_rnd");
@@ -33,7 +35,8 @@ class spi_test extends uvm_test;
 
 		seq_init.start(env.agt_drv.sqr);
 		seq_tx.start(env.agt_drv.sqr);
-		seq_strt.start(env.agt_drv.sqr);
+		// seq_rst.start(env.agt_drv.sqr);
+		// seq_strt.start(env.agt_drv.sqr);
 		// seq_rnd.start(env.agt_drv.sqr);
 
 		// fork

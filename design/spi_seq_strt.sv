@@ -17,7 +17,7 @@ class spi_seq_strt extends uvm_sequence #(spi_tran);
 			// we just want normal tx;
 			tr.rst_n <= 1'b1;
 			tr.start <= $urandom_range(0, 1);
-			tr.tx_data <= $urandom_range(0, 2**8);
+			tr.tx_data <= 8'hAB;
 			#($urandom_range(1, 10));
 			finish_item(tr);
 		end
