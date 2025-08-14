@@ -32,7 +32,6 @@ class spi_tran extends uvm_sequence_item;
 
 	int num_miso_rsample;
 	int num_miso_fsample;
-
 	
 	// tx_data is registered prior to any transaction;
 	// if tx_data changes during transaction,

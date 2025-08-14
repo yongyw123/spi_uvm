@@ -63,7 +63,7 @@ class spi_mon extends uvm_monitor;
 				if(vif.rst_n == 1'b1) begin
 					if((vif.cs_n == 1'b1) && (vif.start == 1'b1)) begin
 						tr_dut_free.tx_data_reg = vif.tx_data;
-						// `uvm_info("MONITOR", $sformatf("[FREE] new tx_data registered;"), UVM_MEDIUM)
+						`uvm_info("MONITOR", $sformatf("[FREE] new tx_data registered;"), UVM_MEDIUM)
 					end
 				end
 				mon_ap.write(tr_dut_free);
@@ -96,10 +96,10 @@ class spi_mon extends uvm_monitor;
 					tr_dut.num_mosi_fsample++;
 					tr_dut.num_miso_fsample++;
 				end
-				else if(vif.done == 1'b1) begin
-					tr_dut.num_mosi_fsample++;
-					tr_dut.num_miso_fsample++;
-				end
+				// else if(vif.done == 1'b1) begin
+				// 	tr_dut.num_mosi_fsample++;
+				// 	tr_dut.num_miso_fsample++;
+				// end
 				else begin
 					tr_dut.num_mosi_fsample = 0;
 					tr_dut.num_miso_fsample = 0;
@@ -152,17 +152,16 @@ class spi_mon extends uvm_monitor;
 				tr_dut.mosi_rpush_bit(vif.mosi);
 				tr_dut.miso_rpush_bit(vif.miso);
 
-				if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-					tr_dut.num_mosi_rsample++;
-					tr_dut.num_miso_rsample++;
+				
+				if(tr_dut.num_mosi_rsample == 8) begin				
+					tr_dut.mosi_rq_clear();
+					tr_dut.miso_rq_clear();
 				end
-				else if(vif.done == 1'b1) begin
+				else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
 					tr_dut.num_mosi_rsample++;
 					tr_dut.num_miso_rsample++;
 				end
 				else begin
-					tr_dut.num_mosi_rsample = 0;
-					tr_dut.num_miso_rsample = 0;
 					tr_dut.mosi_rq_clear();
 					tr_dut.miso_rq_clear();
 				end
