@@ -1,29 +1,48 @@
 class spi_test extends uvm_test;
-  `uvm_component_utils(spi_test)
+	`uvm_component_utils(spi_test)
 
-  spi_env env;
-  spi_seq seq;
-  
-  function new(string name, uvm_component parent);
-    super.new(name, parent);
-  endfunction
+	spi_env env;
+	
+	spi_seq_init seq_init;
+	spi_seq_strt seq_strt;
+	spi_seq_tx seq_tx;
+	spi_seq_rnd seq_rnd;
 
-  function void build_phase(uvm_phase phase);
-    super.build_phase(phase);
-    env = spi_env::type_id::create("env", this);
-    
-  endfunction
+	function new(string name, uvm_component parent);
+		super.new(name, parent);
+	endfunction
 
-  task run_phase(uvm_phase phase);
-    seq = spi_seq::type_id::create("seq");
-  
-    `uvm_info("TEST", $sformatf("Starting sequences"), UVM_MEDIUM)
+	function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+		env = spi_env::type_id::create("env", this);
+	endfunction
 
-    phase.raise_objection(this);
-    
-    seq.start(env.agt_drv.sqr);
+	task run_phase(uvm_phase phase);
+	
+		seq_init = spi_seq_init::type_id::create("seq_init");
+		seq_strt = spi_seq_strt::type_id::create("seq_strt");
+		seq_tx = spi_seq_tx::type_id::create("seq_tx");
+		seq_rnd = spi_seq_rnd::type_id::create("seq_rnd");
+		
+		`uvm_info("TEST", $sformatf("Starting sequences"), UVM_MEDIUM)
 
-    phase.drop_objection(this);
-    
-  endtask
+		phase.raise_objection(this);
+
+		// issue the sequence sequentially;
+		// then spam in parallel; allow random arbitration;
+
+		seq_init.start(env.agt_drv.sqr);
+		seq_tx.start(env.agt_drv.sqr);
+		seq_strt.start(env.agt_drv.sqr);
+		// seq_rnd.start(env.agt_drv.sqr);
+
+		// fork
+		// 	seq_tx.start(env.agt_drv.sqr);
+		// 	seq_strt.start(env.agt_drv.sqr);
+		// 	seq_rnd.start(env.agt_drv.sqr);
+		// join
+		
+	phase.drop_objection(this);
+
+	endtask
 endclass

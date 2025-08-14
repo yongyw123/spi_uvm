@@ -2,25 +2,30 @@
 `include "spi.sv"
 
 module spi_tb;
-  import uvm_pkg::*;
-  `include "uvm_macros.svh"
+	import uvm_pkg::*;
+	`include "uvm_macros.svh"
 
-  // $time is a built-in system function
-  initial $display(">>>>>>>> SIM TIME START: %0t", $time);
-  final   $display(">>>>>>>> SIM TIME END  : %0t", $time);
+	// $time is a built-in system function
+	initial $display(">>>>>>>> SIM TIME START: %0t", $time);
+	final   $display(">>>>>>>> SIM TIME END  : %0t", $time);
 
-  // Include all required files
-  `include "spi_tran.sv"
-  `include "spi_seq.sv"
-  `include "spi_sqr.sv"
-  `include "spi_drv.sv"
-  `include "spi_mon.sv"
-  `include "spi_agt.sv"
-  `include "spi_scb.sv"
-  `include "spi_env.sv"
-  `include "spi_test.sv"
+	// Include all required files
+	`include "spi_tran.sv"
 
-  	spi_if spi_if0();
+	`include "spi_seq_init.sv"
+	`include "spi_seq_strt.sv"
+	`include "spi_seq_tx.sv"
+	`include "spi_seq_rnd.sv"
+
+	`include "spi_sqr.sv"
+	`include "spi_drv.sv"
+	`include "spi_mon.sv"
+	`include "spi_agt.sv"
+	`include "spi_scb.sv"
+	`include "spi_env.sv"
+	`include "spi_test.sv"
+
+	spi_if spi_if0();
 
 	spi #(
 		.CLK_DIV(4)
@@ -90,4 +95,4 @@ module spi_tb;
 		$fsdbDumpSVA(0, spi_tb);
 		$fsdbDumpvars(0, spi_tb);
 	end
-	endmodule
+endmodule

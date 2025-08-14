@@ -122,8 +122,8 @@ class spi_mon extends uvm_monitor;
 				mon_ap.write(tr_dut);
 				
 				// wrap around;
-				tr_dut.num_mosi_fsample = tr_dut.num_mosi_fsample % 9;
-				tr_dut.num_miso_fsample = tr_dut.num_miso_fsample % 9;
+				tr_dut.num_mosi_fsample = tr_dut.num_mosi_fsample % 8;
+				tr_dut.num_miso_fsample = tr_dut.num_miso_fsample % 8;
 			end
 			
 			// rising sampling;
@@ -183,8 +183,8 @@ class spi_mon extends uvm_monitor;
 				mon_ap.write(tr_dut);
 				
 				// wrap around;
-				tr_dut.num_miso_rsample = tr_dut.num_miso_rsample % 9;
-				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 9;
+				tr_dut.num_miso_rsample = tr_dut.num_miso_rsample % 8;
+				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 8;
 			end
 		join
 	endtask

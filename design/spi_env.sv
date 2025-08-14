@@ -12,6 +12,7 @@ class spi_env extends uvm_env;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
+    
     // Set driver agent as active
     uvm_config_db#(uvm_active_passive_enum)::set(this, "agt_drv", "is_active", UVM_ACTIVE);
     

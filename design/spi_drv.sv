@@ -27,21 +27,39 @@ class spi_drv extends uvm_driver #(spi_tran);
 		forever begin
 			seq_item_port.get_next_item(tr);
 
-			`uvm_info("DRIVER", $sformatf("Drive tran to DUT: tx_data=0x%8h",
-											tr.tx_data), UVM_MEDIUM)
-			repeat(10) @(vif.clk);
-			vif.rst_n <= 1'b1;
-
-			repeat(10) @(vif.clk);
+			vif.rst_n <= tr.rst_n;
 			vif.tx_data <= tr.tx_data;
-			vif.start <= 1'b1;
-			wait(vif.busy) @(posedge vif.clk);
+			vif.start <= tr.start;
 
+			repeat ($urandom_range(0, 7)) @(vif.clk);
+
+			// `uvm_info("DRIVER", $sformatf("Drive tran to DUT: tx_data=0x%8h",
+			// 								tr.tx_data), UVM_MEDIUM)
+			// repeat(10) @(vif.clk);
+			// vif.rst_n <= 1'b1;
+
+			// repeat(10) @(vif.clk);
+			// vif.tx_data <= tr.tx_data;
+			// vif.start <= 1'b1;
+			// wait(vif.busy) @(posedge vif.clk);
+
+			// // wait for spi tran to complete;
+			// wait(vif.done) @(posedge vif.clk);
+
+			// `uvm_info("DRIVER", $sformatf("SPI done: %0b", vif.done), UVM_MEDIUM)
+			
 			// wait for spi tran to complete;
-			wait(vif.done) @(posedge vif.clk);
+			// wait(vif.done) @(posedge vif.clk);
 
-			`uvm_info("DRIVER", $sformatf("SPI done: %0b", vif.done), UVM_MEDIUM)
+			if((tr.rst_n == 1'b1) && (tr.start == 1'b1)) begin
+				wait(vif.done) @(posedge vif.clk);
+				repeat ($urandom_range(1, 17)) @(vif.clk);
+			end
 
+			else begin
+				repeat ($urandom_range(5, 19)) @(vif.clk);
+			end
+			
 			seq_item_port.item_done();
 		end
 	endtask
