@@ -21,8 +21,11 @@ class spi_tran extends uvm_sequence_item;
 	rand bit miso;
 	rand bit cs_n;
 
-	// sampling type: falling vs rising sclk;
+	// sampling type: falling vs rising sclk vs free running'
 	string sample_type;
+
+	// consumer vs driver?
+	bit tran_is_drv_type;
 
 	int num_mosi_rsample;
 	int num_mosi_fsample;
@@ -30,8 +33,11 @@ class spi_tran extends uvm_sequence_item;
 	int num_miso_rsample;
 	int num_miso_fsample;
 
-	// consumer vs driver?
-	bit tran_is_drv_type;
+	
+	// tx_data is registered prior to any transaction;
+	// if tx_data changes during transaction,
+	// then this new tx_data will be for the next transaction;
+	bit [7:0] tx_data_reg;
 
 	// queue;
 	bit [7:0] mosi_rdata_q[$];

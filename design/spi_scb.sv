@@ -4,7 +4,8 @@ class spi_scb extends uvm_scoreboard;
 	uvm_analysis_imp #(spi_tran, spi_scb) scb_imp;
 	uvm_tlm_analysis_fifo #(spi_tran) drv_fifo;
 	uvm_tlm_analysis_fifo #(spi_tran) con_fifo;
-	
+	uvm_tlm_analysis_fifo #(spi_tran) free_fifo; 
+
 	int passed_count;
   	int failed_count;
 
@@ -20,42 +21,55 @@ class spi_scb extends uvm_scoreboard;
 		super.build_phase(phase);
 		drv_fifo = new("drv_fifo", this);
 		con_fifo = new("con_fifo", this);
+		free_fifo = new("free_fifo", this);
 
 	endfunction
 
 	function void write(spi_tran tr_dut);
-		// driver;
-		if(tr_dut.tran_is_drv_type) begin
-			drv_fifo.try_put(tr_dut);
+		// free-running sampling based
+		// on the system clock;
+		if(tr_dut.sample_type == "free") begin
+			free_fifo.try_put(tr_dut);
+			`uvm_info("SCB", $sformatf("[FREE_FIFO] got content;"), UVM_MEDIUM)
 		end
-		// consumer;
+		// sampling based on sclk;
 		else begin
-			con_fifo.try_put(tr_dut);
+			// driver;
+			if(tr_dut.tran_is_drv_type) begin
+				drv_fifo.try_put(tr_dut);
+				`uvm_info("SCB", $sformatf("[DRV_FIFO] got content;"), UVM_MEDIUM)
+			end
+			// consumer
+			else begin
+				con_fifo.try_put(tr_dut);
+				`uvm_info("SCB", $sformatf("[CON_FIFO] got content;"), UVM_MEDIUM)
+			end
 		end
-		
 	endfunction
 
 	task run_phase(uvm_phase phase);
 		spi_tran tr_fifo_drv;
 		spi_tran tr_fifo_con;
+		spi_tran tr_fifo_free;
 		
 		forever begin
 			fork
 				begin drv_fifo.get(tr_fifo_drv); end
 				begin con_fifo.get(tr_fifo_con); end
+				begin free_fifo.get(tr_fifo_free); end
 			join
 
 			/////////////////////
 			// TEST 01: RESET;
 			/////////////////////
-			if(tr_fifo_drv.rst_n == 1'b0) begin
+			if(tr_fifo_free.rst_n == 1'b0) begin
 				sva_t1: assert(
-					(tr_fifo_drv.busy == 1'b0) &&
-					(tr_fifo_drv.done == 1'b0) &&
-					(tr_fifo_drv.sclk == 1'b0) &&
-					(tr_fifo_drv.mosi == 1'b0) &&
-					(tr_fifo_drv.cs_n == 1'b1) &&
-					(tr_fifo_drv.rx_data == '0)
+					(tr_fifo_free.busy == 1'b0) &&
+					(tr_fifo_free.done == 1'b0) &&
+					(tr_fifo_free.sclk == 1'b0) &&
+					(tr_fifo_free.mosi == 1'b0) &&
+					(tr_fifo_free.cs_n == 1'b1) &&
+					(tr_fifo_free.rx_data == '0)
 				) begin
 					passed_count++; 
 					`uvm_info("SCOREBOARD", $sformatf("TEST RESET - PASSED"), UVM_MEDIUM)
@@ -70,14 +84,14 @@ class spi_scb extends uvm_scoreboard;
 			// TEST 02: IDLE
 			/////////////////////
 			// not reset not start;
-			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b0))begin
+			if((tr_fifo_free.rst_n == 1'b1) && (tr_fifo_free.start == 1'b0))begin
 				sva_t2: assert(
-					(tr_fifo_drv.busy == 1'b0) &&
-					(tr_fifo_drv.done == 1'b0) &&
-					(tr_fifo_drv.sclk == 1'b0) &&
-					(tr_fifo_drv.mosi == 1'b0) &&
-					(tr_fifo_drv.cs_n == 1'b1) &&
-					(tr_fifo_drv.rx_data == '0)
+					(tr_fifo_free.busy == 1'b0) &&
+					(tr_fifo_free.done == 1'b0) &&
+					(tr_fifo_free.sclk == 1'b0) &&
+					(tr_fifo_free.mosi == 1'b0) &&
+					(tr_fifo_free.cs_n == 1'b1) &&
+					(tr_fifo_free.rx_data == '0)
 				) begin
 					passed_count++;
 					`uvm_info("SCOREBOARD", $sformatf("TEST IDLE - PASSED"), UVM_MEDIUM)
