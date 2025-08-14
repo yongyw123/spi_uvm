@@ -10,6 +10,10 @@ clean:
 	\rm -frd seed* sysBusyP* vc_hdrs.h
 	\rm -frd bus_cov ${MODULE}_simv.vdb cm.log .fsm.sch.verilog.xml
 	\rm -frd qrun sysProgressP.conf sysProgressPLog vdCov.conf vdCovLog
+	\rm -frd waveform.fsdb
 
 run_dv:
 	${ROOT}/sim/run_sim.csh dv ${MODULE}
+
+waveform:
+	verdi -ssf waveform.fsdb &
