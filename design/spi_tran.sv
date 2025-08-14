@@ -102,67 +102,67 @@ class spi_tran extends uvm_sequence_item;
 
     function void mosi_rpush_bit(bit b);
       
-      mosi_rbit_acc = {mosi_rbit_acc[6:0], b};
-      mosi_rbit_cnt++;
+		mosi_rbit_acc = {mosi_rbit_acc[6:0], b};
+		mosi_rbit_cnt++;
 
-      $display("[%s] MOSI Pushed bit: %b -> acc = %8b, mosi_rbit_cnt = %0d", sample_type, b, mosi_rbit_acc, mosi_rbit_cnt);
+		// $display("[%s] MOSI Pushed bit: %b -> acc = %8b, mosi_rbit_cnt = %0d", sample_type, b, mosi_rbit_acc, mosi_rbit_cnt);
 
-      if (mosi_rbit_cnt == 8) begin
-        // mosi_rdata_q.push_back(mosi_rbit_acc);
-		mosi_rdata_q.insert(0, mosi_rbit_acc);
-        $display(">> [%s] MOSI Pushed byte to queue: %8b", sample_type, mosi_rbit_acc);
-        mosi_rbit_acc = 0;
-        mosi_rbit_cnt = 0;
-      end
-    endfunction
+		if (mosi_rbit_cnt == 8) begin
+			// mosi_rdata_q.push_back(mosi_rbit_acc);
+			mosi_rdata_q.insert(0, mosi_rbit_acc);
+			// $display(">> [%s] MOSI Pushed byte to queue: %8b", sample_type, mosi_rbit_acc);
+			mosi_rbit_acc = 0;
+			mosi_rbit_cnt = 0;
+		end
+	endfunction
 
 	function void mosi_fpush_bit(bit b);
       
-      mosi_fbit_acc = {mosi_fbit_acc[6:0], b};
-      mosi_fbit_cnt++;
+		mosi_fbit_acc = {mosi_fbit_acc[6:0], b};
+		mosi_fbit_cnt++;
 
-      $display("[%s] MOSI Pushed bit: %b -> acc = %8b, mosi_fbit_cnt = %0d", sample_type, b, mosi_fbit_acc, mosi_fbit_cnt);
+		// $display("[%s] MOSI Pushed bit: %b -> acc = %8b, mosi_fbit_cnt = %0d", sample_type, b, mosi_fbit_acc, mosi_fbit_cnt);
 
-      if (mosi_fbit_cnt == 8) begin
-        // mosi_fdata_q.push_back(mosi_fbit_acc);
-		mosi_fdata_q.insert(0, mosi_fbit_acc);
-        $display(">> [%s] MOSI Pushed byte to queue: %8b", sample_type, mosi_fbit_acc);
-        mosi_fbit_acc = 0;
-        mosi_fbit_cnt = 0;
-      end
-    endfunction
+		if (mosi_fbit_cnt == 8) begin
+			// mosi_fdata_q.push_back(mosi_fbit_acc);
+			mosi_fdata_q.insert(0, mosi_fbit_acc);
+			// $display(">> [%s] MOSI Pushed byte to queue: %8b", sample_type, mosi_fbit_acc);
+			mosi_fbit_acc = 0;
+			mosi_fbit_cnt = 0;
+		end
+	endfunction
 
 	function void miso_rpush_bit(bit b);
       
-      miso_rbit_acc = {miso_rbit_acc[6:0], b};
-      miso_rbit_cnt++;
+		miso_rbit_acc = {miso_rbit_acc[6:0], b};
+		miso_rbit_cnt++;
 
-      $display("[%s] MISO Pushed bit: %b -> acc = %8b, miso_rbit_cnt = %0d", sample_type, b, miso_rbit_acc, miso_rbit_cnt);
+		// $display("[%s] MISO Pushed bit: %b -> acc = %8b, miso_rbit_cnt = %0d", sample_type, b, miso_rbit_acc, miso_rbit_cnt);
 
-      if (miso_rbit_cnt == 8) begin
-        // miso_rdata_q.push_back(miso_rbit_acc);
-		miso_rdata_q.insert(0, miso_rbit_acc);
-        $display(">> [%s] MISO Pushed byte to queue: %8b", sample_type, miso_rbit_acc);
-        miso_rbit_acc = 0;
-        miso_rbit_cnt = 0;
-      end
-    endfunction
+		if (miso_rbit_cnt == 8) begin
+			// miso_rdata_q.push_back(miso_rbit_acc);
+			miso_rdata_q.insert(0, miso_rbit_acc);
+			// $display(">> [%s] MISO Pushed byte to queue: %8b", sample_type, miso_rbit_acc);
+			miso_rbit_acc = 0;
+			miso_rbit_cnt = 0;
+		end
+	endfunction
 
 	function void miso_fpush_bit(bit b);
       
-      miso_fbit_acc = {miso_fbit_acc[6:0], b};
-      miso_fbit_cnt++;
+		miso_fbit_acc = {miso_fbit_acc[6:0], b};
+		miso_fbit_cnt++;
 
-      $display("[%s] MISO Pushed bit: %b -> acc = %8b, miso_fbit_cnt = %0d", sample_type, b, miso_fbit_acc, miso_fbit_cnt);
+		//$display("[%s] MISO Pushed bit: %b -> acc = %8b, miso_fbit_cnt = %0d", sample_type, b, miso_fbit_acc, miso_fbit_cnt);
 
-      if (miso_fbit_cnt == 8) begin
-        // miso_fdata_q.push_back(miso_fbit_acc);
-		miso_fdata_q.insert(0, miso_fbit_acc);
-        $display(">> [%s] MISO Pushed byte to queue: %8b", sample_type, miso_fbit_acc);
-        miso_fbit_acc = 0;
-        miso_fbit_cnt = 0;
-      end
-    endfunction
+		if (miso_fbit_cnt == 8) begin
+			// miso_fdata_q.push_back(miso_fbit_acc);
+			miso_fdata_q.insert(0, miso_fbit_acc);
+			// $display(">> [%s] MISO Pushed byte to queue: %8b", sample_type, miso_fbit_acc);
+			miso_fbit_acc = 0;
+			miso_fbit_cnt = 0;
+		end
+	endfunction
 
 
 
