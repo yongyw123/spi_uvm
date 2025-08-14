@@ -92,17 +92,15 @@ class spi_mon extends uvm_monitor;
 				tr_dut.mosi_fpush_bit(vif.mosi);
 				tr_dut.miso_fpush_bit(vif.miso);
 
-				if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
+				if(tr_dut.num_mosi_fsample == 8) begin
+					tr_dut.mosi_fq_clear();
+					tr_dut.miso_fq_clear();
+				end
+				else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
 					tr_dut.num_mosi_fsample++;
 					tr_dut.num_miso_fsample++;
 				end
-				// else if(vif.done == 1'b1) begin
-				// 	tr_dut.num_mosi_fsample++;
-				// 	tr_dut.num_miso_fsample++;
-				// end
 				else begin
-					tr_dut.num_mosi_fsample = 0;
-					tr_dut.num_miso_fsample = 0;
 					tr_dut.mosi_fq_clear();
 					tr_dut.miso_fq_clear();
 				end
@@ -153,36 +151,72 @@ class spi_mon extends uvm_monitor;
 				tr_dut.miso_rpush_bit(vif.miso);
 
 				
-				if(tr_dut.num_mosi_rsample == 8) begin				
-					tr_dut.mosi_rq_clear();
-					tr_dut.miso_rq_clear();
-				end
-				else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
-					tr_dut.num_mosi_rsample++;
-					tr_dut.num_miso_rsample++;
-				end
-				else begin
-					tr_dut.mosi_rq_clear();
-					tr_dut.miso_rq_clear();
-				end
+				tr_dut.num_mosi_rsample++;
+				
+				// if(tr_dut.num_mosi_rsample == 8) begin				
+				// 	tr_dut.mosi_rq_clear();
+				// 	tr_dut.miso_rq_clear();
+				// 	`uvm_info("MONITOR_RDBG_01", $sformatf("cleared"), UVM_MEDIUM)
+				// end
+				// else if((vif.busy == 1'b1) && (vif.cs_n == 1'b0)) begin
+				// 	tr_dut.num_mosi_rsample++;
+				// 	tr_dut.num_miso_rsample++;
+				// end
+				// else begin
+				// 	tr_dut.mosi_rq_clear();
+				// 	tr_dut.miso_rq_clear();
+				// 	`uvm_info("MONITOR_RDBG_02", $sformatf("cleared"), UVM_MEDIUM)
+				// end
 
-				`uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
-						tr_dut.sclk,
-						tr_dut.start,
-						tr_dut.tx_data,
-						tr_dut.rx_data,
-						tr_dut.busy,
-						tr_dut.done,
-						tr_dut.mosi,
-						tr_dut.miso,
-						tr_dut.cs_n,
-						tr_dut.sample_type,
-						tr_dut.tran_is_drv_type
+				// `uvm_info("MONITOR", $sformatf("sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b",
+				// 		tr_dut.sclk,
+				// 		tr_dut.start,
+				// 		tr_dut.tx_data,
+				// 		tr_dut.rx_data,
+				// 		tr_dut.busy,
+				// 		tr_dut.done,
+				// 		tr_dut.mosi,
+				// 		tr_dut.miso,
+				// 		tr_dut.cs_n,
+				// 		tr_dut.sample_type,
+				// 		tr_dut.tran_is_drv_type
+				// 	), 
+				// 	UVM_MEDIUM)
+
+				`uvm_info("MONITOR_DEBUG", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
+
+							tr_dut.rst_n,
+							tr_dut.sclk,
+							tr_dut.start,
+							tr_dut.tx_data,
+							tr_dut.rx_data,
+							tr_dut.busy,
+							tr_dut.done,
+							tr_dut.mosi,
+							tr_dut.miso,
+							tr_dut.cs_n,
+							tr_dut.sample_type,
+							tr_dut.tran_is_drv_type,
+							tr_dut.num_mosi_rsample,
+							tr_dut.num_mosi_fsample,
+							tr_dut.num_miso_rsample,
+							tr_dut.num_miso_fsample,
+							tr_dut.mosi_rdata_q[0],
+							tr_dut.mosi_fdata_q[0],
+							tr_dut.miso_rdata_q[0],
+							tr_dut.miso_fdata_q[0]
 					), 
 					UVM_MEDIUM)
 
 				mon_ap.write(tr_dut);
 				ev_rsclk.reset();
+
+				// tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 8;
+				tr_dut.num_mosi_rsample = tr_dut.num_mosi_rsample % 9;
+				// if(tr_dut.num_mosi_rsample >= 9) begin
+				// 	tr_dut.num_mosi_rsample = 0;
+				// end
+				
 			end
 
 

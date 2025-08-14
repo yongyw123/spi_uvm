@@ -29,7 +29,8 @@ class spi_scb extends uvm_scoreboard;
 		// on the system clock;
 		if(tr_dut.sample_type == "free") begin
 			free_fifo.try_put(tr_dut);
-			// `uvm_info("SCB", $sformatf("[FREE_FIFO] got content;"), UVM_MEDIUM)
+			`uvm_info("SCB", $sformatf("[FREE_FIFO] got content - done: %0b", tr_dut.done), UVM_MEDIUM)
+			
 		end
 		// sampling based on sclk;
 		else begin
@@ -106,7 +107,7 @@ class spi_scb extends uvm_scoreboard;
 			/////////////////////
 			// check order;
 			if((tr_fifo_con.rst_n == 1'b1) && (tr_fifo_con.start == 1'b1))begin
-				if(tr_fifo_con.num_mosi_rsample == 8) begin
+				if(tr_fifo_con.done == 1'b1) begin
 					sva_t3: assert(tr_fifo_con.mosi_rdata_q[0] == tr_fifo_free.tx_data_reg) 
 					begin
 						passed_count++;
@@ -116,11 +117,39 @@ class spi_scb extends uvm_scoreboard;
 						failed_count++;
 						`uvm_info("SCOREBOARD", $sformatf("TEST_TX - FAILED"), UVM_MEDIUM)
 
+						`uvm_info("DEBUG", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2h, rx_data: %8b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %2h, mosi_rdata_q: %p, mosi_fdata_q: %p, miso_rdata_q: %p, miso_fdata_q: %p",
+						// `uvm_info("DEBUG", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %8b, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
+
+							tr_fifo_con.rst_n,
+							tr_fifo_con.sclk,
+							tr_fifo_con.start,
+							tr_fifo_con.tx_data,
+							tr_fifo_con.rx_data,
+							tr_fifo_con.busy,
+							tr_fifo_free.done,
+							tr_fifo_con.mosi,
+							tr_fifo_con.miso,
+							tr_fifo_con.cs_n,
+							tr_fifo_con.sample_type,
+							tr_fifo_con.tran_is_drv_type,
+							tr_fifo_con.num_mosi_rsample,
+							tr_fifo_con.num_mosi_fsample,
+							tr_fifo_con.num_miso_rsample,
+							tr_fifo_con.num_miso_fsample,
+							tr_fifo_free.tx_data_reg,
+							tr_fifo_con.mosi_rdata_q,
+							tr_fifo_con.mosi_fdata_q,
+							tr_fifo_con.miso_rdata_q,
+							tr_fifo_con.miso_fdata_q
+					), 
+					UVM_MEDIUM)
+
 					end
 				end
 			end
 
-			`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %8b, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
+			// `uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %8b, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
+			`uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2h, rx_data: %8b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %2h, mosi_rdata_q: %p, mosi_fdata_q: %p, miso_rdata_q: %p, miso_fdata_q: %p",
 
 		tr_fifo_con.rst_n,
 			tr_fifo_con.sclk,
@@ -128,7 +157,7 @@ class spi_scb extends uvm_scoreboard;
 			tr_fifo_con.tx_data,
 			tr_fifo_con.rx_data,
 			tr_fifo_con.busy,
-			tr_fifo_con.done,
+			tr_fifo_free.done,
 			tr_fifo_con.mosi,
 			tr_fifo_con.miso,
 			tr_fifo_con.cs_n,
@@ -139,10 +168,10 @@ class spi_scb extends uvm_scoreboard;
 			tr_fifo_con.num_miso_rsample,
 			tr_fifo_con.num_miso_fsample,
 			tr_fifo_free.tx_data_reg,
-			tr_fifo_con.mosi_rdata_q[0],
-			tr_fifo_con.mosi_fdata_q[0],
-			tr_fifo_con.miso_rdata_q[0],
-			tr_fifo_con.miso_fdata_q[0]
+			tr_fifo_con.mosi_rdata_q,
+			tr_fifo_con.mosi_fdata_q,
+			tr_fifo_con.miso_rdata_q,
+			tr_fifo_con.miso_fdata_q
 	), 
 	UVM_MEDIUM)
 
