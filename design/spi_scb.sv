@@ -60,9 +60,6 @@ class spi_scb extends uvm_scoreboard;
 				
 				begin 
 					free_fifo.get(tr_fifo_free); 
-					/////////////////////
-					// TEST 01: RESET;
-					/////////////////////
 					
 					`uvm_info("SCOREBOARD", $sformatf("FIFO_FREE - received rst_n: %0b; busy: %0b, done: %0b, sclk: %0b, mosi: %0b, cs_n: %0b, rx_data: %2h, tx_data_reg: %2h", 
 						tr_fifo_free.rst_n,
@@ -75,6 +72,10 @@ class spi_scb extends uvm_scoreboard;
 						tr_fifo_free.tx_data_reg
 					), UVM_MEDIUM)
 
+					/////////////////////
+					// TEST 01: RESET;
+					/////////////////////
+					
 					// ignore mosi;
 					// there is no known mosi default state;
 					// it could be either unknown or one
@@ -198,7 +199,7 @@ class spi_scb extends uvm_scoreboard;
 			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.cs_n == 1'b0))begin
 			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.busy == 1'b1))begin
 				if(tr_fifo_con.done == 1'b1) begin
-					sva_t4: assert(tr_fifo_con.miso_rdata_q[0] == tr_fifo_con.rx_data) 
+					sva_t4: assert(tr_fifo_con.miso_fdata_q[0] == tr_fifo_con.rx_data) 
 					begin
 						passed_count++;
 						`uvm_info("SCOREBOARD", $sformatf("TEST_RX - PASSED"), UVM_MEDIUM)
