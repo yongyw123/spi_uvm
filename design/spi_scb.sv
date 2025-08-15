@@ -43,6 +43,12 @@ class spi_scb extends uvm_scoreboard;
 	int cnt_sysclk;
 	bit last_sampled_sclk;
 
+	int total_transactions;
+	int pass_rate;
+	int fail_rate;
+	int test_passed;
+	string test_summary;
+	
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
 		scb_imp = new("scb_imp", this);
@@ -360,5 +366,41 @@ class spi_scb extends uvm_scoreboard;
 			end//TEST_05_END
 		end
 	endtask//run_phase
+
+	function void extract_phase(uvm_phase phase);
+		// Calculate derived metrics
+		int total_transactions = passed_count + failed_count;
+
+		if (total_transactions > 0) begin
+			// real' is a casting syntax, creates a temporary real (floating-point) version of the value
+			// ' is called the cast operator
+			pass_rate = (real'(passed_count) / real'(total_transactions)) * 100;
+			fail_rate = (real'(failed_count) / real'(total_transactions)) * 100;
+		end else begin
+			pass_rate = 0;
+			fail_rate = 0;
+		end
+
+		// Determine overall test status
+		test_passed = (failed_count == 0);  // If failed_count is 0, return true or 1, meaning test_passed is true or 1
+		test_summary = test_passed ? "TEST PASSED" : "TEST FAILED";
+	endfunction//extract_phase
+
+	function void check_phase(uvm_phase phase);
+		// Final verification of test results
+		if (failed_count > 0) begin
+			`uvm_error("CHECK", $sformatf("Scoreboard detected %0d failures", failed_count))
+		end
+	endfunction//check_phase
+
+	function void report_phase(uvm_phase phase);
+		`uvm_info("SCOREBOARD", "========================================", UVM_NONE)
+		`uvm_info("SCOREBOARD", "SPI TEST RESULTS", UVM_NONE)
+		`uvm_info("SCOREBOARD", "========================================", UVM_NONE)
+		`uvm_info("SCOREBOARD", $sformatf("SPI Test Status: %s", test_summary), UVM_NONE)
+		`uvm_info("SCOREBOARD", $sformatf("Pass Rate: %.2f%%", pass_rate), UVM_NONE)
+		`uvm_info("SCOREBOARD", $sformatf("Passed Tran: %0d", passed_count), UVM_NONE)
+		`uvm_info("SCOREBOARD", $sformatf("Failed Tran: %0d", failed_count), UVM_NONE)
+	endfunction//report_phase
 
 endclass
