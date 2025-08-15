@@ -9,11 +9,19 @@ class spi_scb extends uvm_scoreboard;
 	int passed_count;
   	int failed_count;
 
+	int cnt_sysclk;
+	bit last_sampled_sclk;
+
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
 		scb_imp = new("scb_imp", this);
+
+		// init value;
 		passed_count = 0;
 		failed_count = 0;
+		
+		cnt_sysclk = 0;
+		last_sampled_sclk = 0;
 
 	endfunction
 
@@ -28,10 +36,86 @@ class spi_scb extends uvm_scoreboard;
 		// free-running sampling based
 		// on the system clock;
 		if(tr_dut.sample_type == "free") begin
+
+			// store it into fifo for other tests below for convenience;
+			free_fifo.try_put(tr_dut);
+				
 			// use the consumer type;
 			if(tr_dut.tran_is_drv_type == 1'b0) begin
-				free_fifo.try_put(tr_dut);
-				`uvm_info("SCB", $sformatf("[FREE_FIFO] got content - rst_n: %0b", tr_dut.rst_n), UVM_MEDIUM)
+
+				/////////////////////
+				// TEST 06: SCLK DIV
+				/////////////////////
+				
+				// to check sclk divider;
+				// we check by asserting that sclk
+				// must toggle for every 4 clk;
+				// otherwise, sclk must not toggle;
+				if(tr_dut.rst_n == 1'b1) begin
+					// clear
+					if(
+						((tr_dut.cs_n | tr_dut.done) == 1'b1) ||
+						(tr_dut.busy == 1'b0)
+					) begin
+						cnt_sysclk = 0;
+						last_sampled_sclk = 0;
+					end
+
+					// check sclk;
+					else begin
+						
+						cnt_sysclk++;
+
+						`uvm_info("SCB", $sformatf("[TEST_CLKDIV] cnt_sys_clk: %0d, sclk: %0b, last_sampled_sclk: %0b", 
+							cnt_sysclk,	
+							tr_dut.sclk,
+							last_sampled_sclk
+						), 
+						UVM_MEDIUM)
+
+						// sclk must change after the forth sysclk;
+						if(cnt_sysclk == 5) begin
+							sva_t6a: assert(last_sampled_sclk != tr_dut.sclk)
+								begin
+									passed_count++; 
+									`uvm_info("SCOREBOARD", $sformatf("TEST_CLKDIV - PASSED"), UVM_MEDIUM)
+								end
+								else begin
+									failed_count++;
+									`uvm_info("SCOREBOARD", $sformatf("TEST_CLKDIV - FAILED"), UVM_MEDIUM)
+								end
+
+							// update the last sample;					
+							last_sampled_sclk = tr_dut.sclk;
+
+							// wrap around to 1 because of the fifth above;
+							cnt_sysclk = 1;
+						end
+
+						// sclk must not change;
+						else begin
+							sva_t6b: assert(last_sampled_sclk == tr_dut.sclk)
+								begin
+									passed_count++; 
+									`uvm_info("SCOREBOARD", $sformatf("TEST_CLKDIV - PASSED"), UVM_MEDIUM)
+								end
+								else begin
+									failed_count++;
+									`uvm_info("SCOREBOARD", $sformatf("TEST_CLKDIV - FAILED"), UVM_MEDIUM)
+								end
+							
+						end
+
+						
+					end
+				end
+				
+				// clear
+				else begin
+					cnt_sysclk = 0;
+					last_sampled_sclk = 0;
+				end// TEST_06_END	
+			
 			end
 		end
 		// sampling based on sclk;
@@ -40,6 +124,7 @@ class spi_scb extends uvm_scoreboard;
 			if(tr_dut.tran_is_drv_type) begin
 				drv_fifo.try_put(tr_dut);
 				// `uvm_info("SCB", $sformatf("[DRV_FIFO] got content;"), UVM_MEDIUM)
+				
 			end
 			// consumer
 			else begin
@@ -57,10 +142,10 @@ class spi_scb extends uvm_scoreboard;
 		forever begin
 			
 			fork
-				
 				begin 
 					free_fifo.get(tr_fifo_free); 
-					
+					`uvm_info("SCB", $sformatf("[FREE_FIFO] got_content: sclk: %0b", tr_fifo_free.sclk), UVM_MEDIUM)
+
 					`uvm_info("SCOREBOARD", $sformatf("FIFO_FREE - received rst_n: %0b; busy: %0b, done: %0b, sclk: %0b, mosi: %0b, cs_n: %0b, rx_data: %2h, tx_data_reg: %2h", 
 						tr_fifo_free.rst_n,
 						tr_fifo_free.busy,
@@ -135,6 +220,8 @@ class spi_scb extends uvm_scoreboard;
 							end
 						end
 					end
+
+					
 				end
 
 				begin drv_fifo.get(tr_fifo_drv); end
