@@ -64,15 +64,16 @@ class spi_scb extends uvm_scoreboard;
 					// TEST 01: RESET;
 					/////////////////////
 					
-					// `uvm_info("SCOREBOARD", $sformatf("TEST_RESET - received rst_n: %0b; busy: %0b, done: %0b, sclk: %0b, mosi: %0b, cs_n: %0b, rx_data: %2h", 
-					// 	tr_fifo_free.rst_n,
-					// 	tr_fifo_free.busy,
-					// 	tr_fifo_free.done,
-					// 	tr_fifo_free.sclk,
-					// 	tr_fifo_free.mosi,
-					// 	tr_fifo_free.cs_n,
-					// 	tr_fifo_free.rx_data
-					// ), UVM_MEDIUM)
+					`uvm_info("SCOREBOARD", $sformatf("FIFO_FREE - received rst_n: %0b; busy: %0b, done: %0b, sclk: %0b, mosi: %0b, cs_n: %0b, rx_data: %2h, tx_data_reg: %2h", 
+						tr_fifo_free.rst_n,
+						tr_fifo_free.busy,
+						tr_fifo_free.done,
+						tr_fifo_free.sclk,
+						tr_fifo_free.mosi,
+						tr_fifo_free.cs_n,
+						tr_fifo_free.rx_data,
+						tr_fifo_free.tx_data_reg
+					), UVM_MEDIUM)
 
 					// ignore mosi;
 					// there is no known mosi default state;
@@ -94,27 +95,45 @@ class spi_scb extends uvm_scoreboard;
 							end
 					end
 
-					// /////////////////////
-					// // TEST 02: IDLE
-					// /////////////////////
-					// // not reset not start;
+					/////////////////////
+					// TEST 02: IDLE
+					/////////////////////
+					// not reset not start;
 					// if((tr_fifo_free.rst_n == 1'b1) && (tr_fifo_free.start == 1'b0))begin
-					// 	sva_t2: assert(
-					// 		(tr_fifo_free.busy == 1'b0) &&
-					// 		(tr_fifo_free.done == 1'b0) &&
-					// 		(tr_fifo_free.sclk == 1'b0) &&
-					// 		(tr_fifo_free.mosi == 1'b0) &&
-					// 		(tr_fifo_free.cs_n == 1'b1) &&
-					// 		(tr_fifo_free.rx_data == '0)
-					// 	) begin
-					// 		passed_count++;
-					// 		`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - PASSED"), UVM_MEDIUM)
-					// 	end
-					// 	else begin
-					// 		failed_count++;
-					// 		`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - FAILED"), UVM_MEDIUM)
-					// 	end
-					// end
+					if(tr_fifo_free.rst_n == 1'b1) begin
+						// if the start is de-asserted prior to any transaction, 
+						// we expect the output to be in the default state;
+						// otherwise, if the start is de-asserted during an ongoing 
+						// transaction, then we should expect the start state
+						// to be ignored;
+						if((tr_fifo_free.start == 1'b1) && (tr_fifo_free.busy == 1'b0)) begin
+							sva_t2a: assert(
+								(tr_fifo_free.busy == 1'b0) &&
+								(tr_fifo_free.done == 1'b0) &&
+								(tr_fifo_free.sclk == 1'b0) &&
+								(tr_fifo_free.mosi == 1'b0) &&
+								(tr_fifo_free.cs_n == 1'b1) &&
+								(tr_fifo_free.rx_data == '0)
+							) begin
+								passed_count++;
+								`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - PASSED"), UVM_MEDIUM)
+							end
+							else begin
+								failed_count++;
+								`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - FAILED"), UVM_MEDIUM)
+							end
+						end
+						else if((tr_fifo_free.start == 1'b1) && (tr_fifo_free.busy == 1'b1)) begin
+							sva_t2b: assert(tr_fifo_free.cs_n == 1'b0) begin
+								passed_count++;
+								`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - PASSED"), UVM_MEDIUM)
+							end
+							else begin
+								failed_count++;
+								`uvm_info("SCOREBOARD", $sformatf("TEST_IDLE - FAILED"), UVM_MEDIUM)
+							end
+						end
+					end
 				end
 
 				begin drv_fifo.get(tr_fifo_drv); end
@@ -141,7 +160,7 @@ class spi_scb extends uvm_scoreboard;
 					tr_fifo_con.num_mosi_fsample,
 					tr_fifo_con.num_miso_rsample,
 					tr_fifo_con.num_miso_fsample,
-					tr_fifo_con.tx_data_reg,
+					tr_fifo_free.tx_data_reg,
 					tr_fifo_con.mosi_rdata_q,
 					tr_fifo_con.mosi_fdata_q,
 					tr_fifo_con.miso_rdata_q,
@@ -150,12 +169,13 @@ class spi_scb extends uvm_scoreboard;
 			UVM_MEDIUM)
 
 
-			
 			/////////////////////
 			// TEST 03: TX -> MOSI
 			/////////////////////
 			// check order;
-			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.cs_n == 1'b0))begin
+			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.busy == 1'b1))begin
 				if(tr_fifo_con.done == 1'b1) begin
 					sva_t3: assert(tr_fifo_con.mosi_rdata_q[0] == tr_fifo_free.tx_data_reg) 
 					begin
@@ -164,50 +184,55 @@ class spi_scb extends uvm_scoreboard;
 					end
 					else begin
 						failed_count++;
-						`uvm_info("SCOREBOARD", $sformatf("TEST_TX - FAILED"), UVM_MEDIUM)
+						`uvm_info("SCOREBOARD", $sformatf("TEST_TX - FAILED - expected mosi_rdata_q: %p == tx_data_reg:%2h", 
+							tr_fifo_con.mosi_rdata_q, tr_fifo_free.tx_data_reg), UVM_MEDIUM)
 					end
 				end
 			end
 
-// 			/////////////////////
-// 			// TEST 04: MISO -> RX
-// 			/////////////////////
-// 			// check order;
-// 			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
-// 				if(tr_fifo_con.done == 1'b1) begin
-// 					sva_t4: assert(tr_fifo_con.miso_rdata_q[0] == tr_fifo_con.rx_data) 
-// 					begin
-// 						passed_count++;
-// 						`uvm_info("SCOREBOARD", $sformatf("TEST_RX - PASSED"), UVM_MEDIUM)
-// 					end
-// 					else begin
-// 						failed_count++;
-// 						`uvm_info("SCOREBOARD", $sformatf("TEST_RX - FAILED"), UVM_MEDIUM)
-// 					end
-// 				end
-// 			end
+			/////////////////////
+			// TEST 04: MISO -> RX
+			/////////////////////
+			// check order;
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.cs_n == 1'b0))begin
+			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.busy == 1'b1))begin
+				if(tr_fifo_con.done == 1'b1) begin
+					sva_t4: assert(tr_fifo_con.miso_rdata_q[0] == tr_fifo_con.rx_data) 
+					begin
+						passed_count++;
+						`uvm_info("SCOREBOARD", $sformatf("TEST_RX - PASSED"), UVM_MEDIUM)
+					end
+					else begin
+						failed_count++;
+						`uvm_info("SCOREBOARD", $sformatf("TEST_RX - FAILED"), UVM_MEDIUM)
+					end
+				end
+			end
 
-// 			/////////////////////
-// 			// TEST 05: MISO CPHA
-// 			/////////////////////
-// 			// check falling edge for rx_data;
-// 			// except for all-ones or all-zeros;
-// 			// de-serialized miso sampled at rising sclk and falling sclk should be different;
-// 			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
-// 				if(tr_fifo_con.done == 1'b1) begin
-// 					if((tr_fifo_con.rx_data != '0) || (tr_fifo_con.rx_data != '1)) begin
-// 						sva_t5: assert(tr_fifo_con.miso_rdata_q[0] != tr_fifo_con.miso_fdata_q[0]) 
-// 						begin
-// 							passed_count++;
-// 							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - PASSED"), UVM_MEDIUM)
-// 						end
-// 						else begin
-// 							failed_count++;
-// 							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - FAILED"), UVM_MEDIUM)
-// 						end
-// 					end
-// 				end
-// 			end
+			/////////////////////
+			// TEST 05: MISO CPHA
+			/////////////////////
+			// check falling edge for rx_data;
+			// except for all-ones or all-zeros;
+			// de-serialized miso sampled at rising sclk and falling sclk should be different;
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.start == 1'b1))begin
+			// if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.cs_n == 1'b0))begin
+			if((tr_fifo_drv.rst_n == 1'b1) && (tr_fifo_drv.busy == 1'b1))begin
+				if(tr_fifo_con.done == 1'b1) begin
+					if((tr_fifo_con.rx_data != '0) || (tr_fifo_con.rx_data != '1)) begin
+						sva_t5: assert(tr_fifo_con.miso_rdata_q[0] != tr_fifo_con.miso_fdata_q[0]) 
+						begin
+							passed_count++;
+							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - PASSED"), UVM_MEDIUM)
+						end
+						else begin
+							failed_count++;
+							`uvm_info("SCOREBOARD", $sformatf("TEST_CPHA - FAILED"), UVM_MEDIUM)
+						end
+					end
+				end
+			end
 
 
 // // `uvm_info("IN_FIFO", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, tx_data_reg: %8b, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",

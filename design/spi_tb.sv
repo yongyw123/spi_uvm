@@ -17,6 +17,7 @@ module spi_tb;
 	`include "spi_seq_rst.sv"
 	`include "spi_seq_tx.sv"
 	`include "spi_seq_rnd.sv"
+	`include "spi_seq_hs.sv"
 
 	`include "spi_sqr.sv"
 	`include "spi_drv.sv"
