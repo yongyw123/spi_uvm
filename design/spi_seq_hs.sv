@@ -2,20 +2,22 @@
 class spi_seq_hs extends uvm_sequence #(spi_tran);
 	`uvm_object_utils(spi_seq_hs)
 
+	int tb_num_seq;
+
 	function new(string name = "spi_seq_hs");
 		super.new(name);
-	endfunction
+	endfunction//new
 
 	task body();
 		spi_tran tr;
 		spi_tran rsp;
 
         tr = spi_tran::type_id::create("tr");
-		rsp = spi_tran::type_id::create("rso");
+		rsp = spi_tran::type_id::create("rsp");
 
-		`uvm_info(get_type_name(), "HS Sequence", UVM_MEDIUM)
+		`uvm_info(get_type_name(), "SEQ_HANDSHAKE", UVM_MEDIUM)
 
-		repeat (30) begin
+		repeat (tb_num_seq) begin
 			start_item(tr);
 
 				tr.rst_n <= 1'b1;
@@ -32,5 +34,5 @@ class spi_seq_hs extends uvm_sequence #(spi_tran);
 
 			get_response(rsp);
 		end
-	endtask
+	endtask//body
 endclass

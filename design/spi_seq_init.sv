@@ -1,15 +1,16 @@
 // seq: initialization;
 class spi_seq_init extends uvm_sequence #(spi_tran);
 	`uvm_object_utils(spi_seq_init)
+	int tb_num_seq;
 
 	function new(string name = "spi_seq_init");
 		super.new(name);
-	endfunction
+	endfunction//new
 
 	task body();
 		spi_tran tr;
         tr = spi_tran::type_id::create("tr");
-		`uvm_info(get_type_name(), "Init Sequence", UVM_MEDIUM)
+		`uvm_info(get_type_name(), "SEQ_INIT", UVM_MEDIUM)
         
         start_item(tr);
 
@@ -21,16 +22,5 @@ class spi_seq_init extends uvm_sequence #(spi_tran);
         // hold the reset for some random length;
         #($urandom_range(10, 33));
 		finish_item(tr);
-
-        // // issue some basic spi transactions;
-		// repeat (10) begin
-		// 	start_item(tr);
-		// 	tr.tx_data = $urandom_range(0, 2**8);
-		// 	// assert(tr.tx_data.randomize());
-
-		// 	#($urandom_range(1, 4));
-		// 	finish_item(tr);
-
-		// end
-	endtask
+	endtask//body
 endclass
