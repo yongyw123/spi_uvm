@@ -169,7 +169,7 @@ class spi_mon extends uvm_monitor;
 				@(posedge vif.sclk)
 				
 				// need to delay one sys clk to sample valid data;
-				@(posedge vif.clk);
+				// @(posedge vif.clk);
 
 				tr_dut.rst_n = vif.rst_n;
 				tr_dut.start = vif.start;
