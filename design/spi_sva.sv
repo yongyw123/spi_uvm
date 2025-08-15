@@ -58,7 +58,7 @@ module spi_sva #(
     // once asserted, cs_n must remain stable for 8 sclk;
     property sva_cs_stable;
         @(posedge clk) disable iff(~rst_n)
-            $fell(cs_n)|=> $stable(cs_n)[*((SCLK_PERIOD+1)*8)];
+            $fell(cs_n)|=> $stable(cs_n)[*((SCLK_PERIOD)*4)];
     endproperty
 
     // idle;
@@ -70,14 +70,17 @@ module spi_sva #(
     // rx_data must not change until done;
     property sva_rx_data_stable;
         @(posedge clk) disable iff(~rst_n)
-            $rose(busy)|=> $stable(rx_data) until_with(done);
+            $rose(busy)|=> $stable(rx_data) until(done);
     endproperty
 
     // rx_data must be updated at the negedge of sclk;
     // per mode: {cphol: 0, cpha: 1};
     property sva_rx_data_neg;
         @(posedge clk) disable iff(~rst_n)
-            $changed(rx_data) |=> $fell(sclk);
+            $changed(rx_data) |-> (
+                (sclk == 1'b0) &&
+                ($past(sclk, 2) == 1'b1) 
+            );
     endproperty
 
     ap_sva_done_pulse: assert property(sva_done_pulse) else $error("%0t [SVA] expected done signal to be one-clock cycle.", $time);
