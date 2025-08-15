@@ -1,5 +1,6 @@
 `include "spi_if.sv"
 `include "spi.sv"
+`include "spi_sva.sv"
 
 module spi_tb;
 	import uvm_pkg::*;
@@ -28,11 +29,26 @@ module spi_tb;
 	`include "spi_env.sv"
 	`include "spi_test.sv"
 
+	localparam int CLK_DIV = 4;
 	spi_if spi_if0();
 
 	spi #(
-		.CLK_DIV(4)
+		.CLK_DIV(CLK_DIV)
 	)dut(
+		.clk(spi_if0.clk),
+		.rst_n(spi_if0.rst_n),
+		.start(spi_if0.start),
+		.tx_data(spi_if0.tx_data),
+		.rx_data(spi_if0.rx_data),
+		.busy(spi_if0.busy),
+		.done(spi_if0.done),
+		.sclk(spi_if0.sclk),
+		.mosi(spi_if0.mosi),
+		.miso(spi_if0.miso),
+		.cs_n(spi_if0.cs_n)
+	);
+
+	bind spi spi_sva #(.CLK_DIV(CLK_DIV)) u_spi_sva (
 		.clk(spi_if0.clk),
 		.rst_n(spi_if0.rst_n),
 		.start(spi_if0.start),
