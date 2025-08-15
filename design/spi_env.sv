@@ -24,13 +24,15 @@ class spi_env extends uvm_env;
 
 		scb = spi_scb::type_id::create("scb", this);
 		cov = spi_cov::type_id::create("cov", this);
-		
+
 	endfunction
 
 	function void connect_phase(uvm_phase phase);
 		super.connect_phase(phase);
 		agt_drv.agt_ap.connect(scb.scb_imp);
 		agt_con.agt_ap.connect(scb.scb_imp);
+
+		agt_con.agt_ap.connect(cov.cov_imp);
 		agt_drv.agt_ap.connect(cov.cov_imp);
 	endfunction
 endclass
