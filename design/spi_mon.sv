@@ -45,6 +45,7 @@ class spi_mon extends uvm_monitor;
 		fork
 			// free running
 			forever begin
+				// @(posedge vif.clk or negedge vif.rst_n);
 				@(posedge vif.clk);
 				tr_dut_free.rst_n = vif.rst_n;
 				tr_dut_free.start = vif.start;
@@ -66,11 +67,36 @@ class spi_mon extends uvm_monitor;
 						`uvm_info("MONITOR", $sformatf("[FREE] new tx_data registered;"), UVM_MEDIUM)
 					end
 				end
+
+				// if reset; clear the qu1eues for other sampling block;
+				if(vif.rst_n == 1'b0) begin
+					`uvm_info("MONITOR", $sformatf("[FREE] reset is asserted;"), UVM_MEDIUM)
+					// tr_dut.sample_type = "free";
+					tr_dut.rst_n = vif.rst_n;
+					tr_dut.start = vif.start;
+					tr_dut.tx_data = vif.tx_data;
+					tr_dut.rx_data = vif.rx_data;
+					tr_dut.busy = vif.busy;
+					tr_dut.done = vif.done;
+					tr_dut.sclk = vif.sclk;
+					tr_dut.mosi = vif.mosi;
+					tr_dut.miso = vif.miso;
+					tr_dut.cs_n = vif.cs_n;
+					tr_dut.tran_is_drv_type = mon_is_drv;
+
+					tr_dut.mosi_rq_clear();
+					tr_dut.mosi_fq_clear();
+					tr_dut.miso_rq_clear();
+					tr_dut.miso_fq_clear();
+					mon_ap.write(tr_dut);
+				end
+				
 				mon_ap.write(tr_dut_free);
 			end
 
 			// falling sampling;
 			forever begin
+				// @(negedge vif.sclk or ~vif.rst_n)
 				@(negedge vif.sclk)
 				tr_dut.rst_n = vif.rst_n;
 				tr_dut.start = vif.start;
@@ -85,14 +111,25 @@ class spi_mon extends uvm_monitor;
 				tr_dut.sample_type = "fall";
 				tr_dut.tran_is_drv_type = mon_is_drv;
 
-				// deserialize miso and mosi;
-				tr_dut.mosi_fpush_bit(vif.mosi);
-				tr_dut.miso_fpush_bit(vif.miso);
+				if(vif.rst_n) begin
+					// deserialize miso and mosi;
+					tr_dut.mosi_fpush_bit(vif.mosi);
+					tr_dut.miso_fpush_bit(vif.miso);
 
-				// increment;
-				tr_dut.num_mosi_fsample++;
-				tr_dut.num_miso_fsample++;			
+					// increment;
+					tr_dut.num_mosi_fsample++;
+					tr_dut.num_miso_fsample++;			
+				end
+				else begin
+					`uvm_info("MONITOR - FALLING", $sformatf("reset asserted -> clearing the transaction queue"), UVM_MEDIUM)
+					tr_dut.mosi_fq_clear();
+					tr_dut.miso_fq_clear();
 
+					tr_dut.num_mosi_fsample = 0;
+					tr_dut.num_miso_fsample = 0;
+				end
+
+				
 				`uvm_info("MONITOR - FALLING", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
 						tr_dut.rst_n,
 						tr_dut.sclk,
@@ -128,6 +165,7 @@ class spi_mon extends uvm_monitor;
 			
 			// rising sampling;
 			forever begin
+				// @(posedge vif.sclk or ~vif.rst_n)
 				@(posedge vif.sclk)
 				
 				// need to delay one sys clk to sample valid data;
@@ -146,13 +184,22 @@ class spi_mon extends uvm_monitor;
 				tr_dut.sample_type = "rising";
 				tr_dut.tran_is_drv_type = mon_is_drv;
 
-				// deserialize miso;	
-				tr_dut.mosi_rpush_bit(vif.mosi);
-				tr_dut.miso_rpush_bit(vif.miso);
-				
-				// increment;
-				tr_dut.num_mosi_rsample++;
-				tr_dut.num_miso_rsample++;
+				if(vif.rst_n) begin
+					// deserialize miso;	
+					tr_dut.mosi_rpush_bit(vif.mosi);
+					tr_dut.miso_rpush_bit(vif.miso);
+
+					// increment;
+					tr_dut.num_mosi_rsample++;
+					tr_dut.num_miso_rsample++;
+				end
+				else begin
+					`uvm_info("MONITOR - FALLING", $sformatf("reset asserted -> clearing the transaction queue"), UVM_MEDIUM)
+					tr_dut.mosi_rq_clear();
+					tr_dut.miso_rq_clear();
+					tr_dut.num_mosi_rsample = 0;
+					tr_dut.num_miso_rsample = 0;
+				end
 
 				`uvm_info("MONITOR - RISING", $sformatf("rst_n: %0b, sclk: %0b, start: %0b, tx_data: %2b, rx_data: %2b, busy: %0b, done: %0d, mosi: %0b, miso: %0b, cs_n: %0b, sampling_type: %s, tran_is_drv: %0b, num_mosi_rsample: %0d, num_mosi_fsample: %0d, num_miso_rsample: %0d, num_miso_fsample: %0d, mosi_rdata_q: %8b, mosi_fdata_q: %8b, miso_rdata_q: %8b, miso_fdata_q: %8b",
 						tr_dut.rst_n,
