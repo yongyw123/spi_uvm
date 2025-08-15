@@ -17,3 +17,6 @@ run_dv:
 
 waveform:
 	verdi -ssf waveform.fsdb &
+
+cov:
+	verdi -cov -covdir spi_simv.vdb &
