@@ -3,6 +3,7 @@ class spi_drv extends uvm_driver #(spi_tran);
 
 	virtual spi_if vif;
 	uvm_analysis_port #(spi_tran) drv_ap;
+	spi_tran rsp;
 
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
@@ -14,10 +15,14 @@ class spi_drv extends uvm_driver #(spi_tran);
 		if(!uvm_config_db#(virtual spi_if)::get(this, "", "vif", vif)) begin
 			`uvm_error("DRIVER", "Virtual interface (drv_cb) not found in config db")
 		end
+
+		rsp = spi_tran::type_id::create("rsp");
+
 	endfunction
 
 	task run_phase(uvm_phase phase);
 		spi_tran tr;
+		
 
 		// initial reset;
 		vif.rst_n <= 1'b0;
@@ -50,17 +55,44 @@ class spi_drv extends uvm_driver #(spi_tran);
 			
 			// wait for spi tran to complete;
 			// wait(vif.done) @(posedge vif.clk);
+			
+			// if((tr.rst_n == 1'b1) && (tr.start == 1'b1)) begin
+			// 	if(tr.busy == 1'b1) begin
+			// 		// Capture DUT response
+			// 		rsp.set_id_info(tr); // Necessary to pair with get_response()
+			// 		rsp.rst_n = vif.rst_n;
+			// 		rsp.done = vif.done;
+			// 		rsp.busy = vif.busy;
+
+			// 		// Send response back to sequence
+			// 		seq_item_port.put_response(rsp);
+			// 	end
+			// end
+
 
 			if((tr.rst_n == 1'b1) && (tr.start == 1'b1)) begin
+			// if((tr.rst_n == 1'b1) && (tr.busy == 1'b1)) begin
+					
 				wait(vif.done) @(posedge vif.clk);
-				repeat ($urandom_range(1, 17)) @(vif.clk);
+				// repeat ($urandom_range(1, 17)) @(vif.clk);
 			end
 
 			else begin
-				repeat ($urandom_range(5, 19)) @(vif.clk);
+				repeat ($urandom_range(0, 11)) @(vif.clk);
 			end
 			
 			seq_item_port.item_done();
+
+			// Capture DUT response
+			rsp.set_id_info(tr); // Necessary to pair with get_response()
+			rsp.rst_n = vif.rst_n;
+			rsp.done = vif.done;
+			rsp.busy = vif.busy;
+
+			// Send response back to sequence
+			seq_item_port.put_response(rsp);
+
+			repeat ($urandom_range(1, 17)) @(vif.clk);
 		end
 	endtask
 endclass
