@@ -39,9 +39,7 @@ class spi_test extends uvm_test;
 		
 		`uvm_info("TEST", $sformatf("Starting sequences with TB_NUM_SEQ: %0d", tb_num_seq), UVM_MEDIUM)
 
-
 		phase.raise_objection(this);
-
 
 		////////////////////////////
 		// FUTURE/TODO:

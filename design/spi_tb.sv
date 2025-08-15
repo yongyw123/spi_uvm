@@ -24,6 +24,7 @@ module spi_tb;
 	`include "spi_mon.sv"
 	`include "spi_agt.sv"
 	`include "spi_scb.sv"
+	`include "spi_cov.sv"
 	`include "spi_env.sv"
 	`include "spi_test.sv"
 
