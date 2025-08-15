@@ -1,6 +1,37 @@
 class spi_scb extends uvm_scoreboard;
 	`uvm_component_utils(spi_scb)
 
+	//////////////////////////////
+	// OVERVIEW;
+	//////////////////////////////
+	// 1, we create three fifos to store the transaction passed from the monitor;
+	// 2. the packets from the monitor are the same;
+	// 3. but we direct / filter the packet into the bins (fifo) depending
+	//		 on the tag/type;
+	// 4. as for the checkers;
+	// 		there are two groups;
+	//			a. we implement the checkers directly using the written packet (without fifo);
+	//				this is where we want "instantaneous" check at every system clock;
+	//				also, here, we do not have to care about fifo underflow or overflow;
+	//			b. we implement the checkers that check SPI protocol using the fifo;
+	//				we compare the packets from the consumer fifo againts the packets
+	//				from the driver fifo;
+	//				
+	// NOTE:
+	// 1. free_fifo; 
+	//		based on system clock; will overflow but DONT CARE;
+	//		reason: we only use this to facilitate the protocol checking;
+	//
+	// 2. drv_fifo;
+	//		we use the packets from the fifo when we want to check the driver end;
+	//		this will not overflow;
+	//		reason: we use the falling or rising sclk captured data;
+	//		which is slower than the system clock;
+	// 
+	// 3. con_fifo:
+	// 		same as drv_fifo but this is the passive monitoring packet;l
+	//			
+
 	uvm_analysis_imp #(spi_tran, spi_scb) scb_imp;
 	uvm_tlm_analysis_fifo #(spi_tran) drv_fifo;
 	uvm_tlm_analysis_fifo #(spi_tran) con_fifo;
