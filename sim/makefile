@@ -20,3 +20,6 @@ waveform:
 
 cov:
 	verdi -cov -covdir spi_simv.vdb &
+
+urg:
+	urg -full64 -dir spi_simv.vdb -report spi_cov
