@@ -1,0 +1,49 @@
+<session version="1.1" release="W-2024.09-SP2" timestp="2025-08-19 06:33:41 GMT">
+  <info>
+    <attr name="datetime" value="Tue Aug 19 14:34:40 2025
+"/>
+    <attr name="command" value="urg -dir spi_simv.vdb -report cov_reports"/>
+    <attr name="top_instance" value="spi_tb,uvm_custom_install_verdi_recording"/>
+  </info>
+  <hvp>
+    <datadef>
+      <metdef name="Line" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Cond" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Toggle" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="FSM" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Branch" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Assert" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Group" type="percent" aggregator="average" builtin="1" />
+    </datadef>
+  </hvp>
+  <old_coverage>
+  <scope type="top" name="top">
+    <metric name="Line" value="86/482" />
+    <metric name="Cond" value="7/103" />
+    <metric name="Toggle" value="206/256" />
+    <metric name="Branch" value="21/208" />
+    <metric name="Group" value="100%" />
+  </scope>
+  <scope type="instance" name="top">
+  </scope>
+  <scope type="group" name="top">
+    <scope type="group" name="spi_tb::spi_cov::spi_cg">
+      <metric name="Group" value="100%" />
+    </scope>
+  </scope>
+  <scope type="assert" name="Statistics">
+    <scorelist type="total" name="Design Hierarchy Assert">
+      <score name="Assert" value="0/0" />
+      <score name="Score" value="0.00" />
+    </scorelist>
+    <scorelist type="total" name="Module List Assert">
+      <score name="Assert" value="0/0" />
+      <score name="Score" value="0.00" />
+    </scorelist>
+    <scorelist type="total" name="Assertion">
+      <score name="Assert" value="0/0" />
+      <score name="Score" value="-nan" />
+    </scorelist>
+  </scope>
+  </old_coverage>
+</session>
