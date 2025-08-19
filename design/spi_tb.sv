@@ -111,7 +111,8 @@ module spi_tb;
 
 	initial begin
 		$fsdbDumpfile("waveform.fsdb");
-		$fsdbDumpSVA(0, spi_tb);
-		$fsdbDumpvars(0, spi_tb);
+		$fsdbDumpvars(0, spi_tb, "+all");
+		$timeformat(-9,3,"ns",0);
+		$printtimescale();
 	end
 endmodule
